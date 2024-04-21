@@ -2,7 +2,7 @@ type Listener<T> = (a: T) => void;
 
 export class Observer<T> {
   private _value: T;
-  private listeners: Map<Listener<T>, boolean> = new Map();
+  private readonly listeners: Map<Listener<T>, boolean> = new Map();
 
   public constructor(value: T) {
     this._value = value;
@@ -21,10 +21,10 @@ export class Observer<T> {
    * Adds a listener and calls it.
    * @param listener Listener
    */
-  public addListener(listener: Listener<T>): Listener<T> {
+  public addListener(listener: Listener<T>): () => void {
     this.listeners.set(listener, true);
     listener(this._value);
-    return listener;
+    return () => this.removeListener(listener);
   }
 
   /**
