@@ -5,11 +5,11 @@
 1. [Description](#description)
 2. [Stages](#stages)
    1. [Stage 1: Primitive](#stage-1-primitive)
-   2. [Stage 2: Agriculture](#stage-2-agricultural-revolution)
+   2. [Stage 2: Agriculture](#stage-2-first-agricultural-revolution)
 
 ## Description
 
-This game will start out with basic hunter-gathering resources and gradually expand to encompass civilization and technology.
+An incremental game about starting from primitive humans to advancing humanity to occupy the entire universe.
 
 # Stages
 
@@ -25,4 +25,4 @@ This game will start out with basic hunter-gathering resources and gradually exp
 
 Next stage unlocks at 100 population.
 
-## Stage 2: Agricultural Revolution
+## Stage 2: First Agricultural Revolution
