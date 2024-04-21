@@ -11,6 +11,7 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "break_eternity.js": "^1.4.2",
     "vue": "^3.4.21"
   },
   "devDependencies": {
