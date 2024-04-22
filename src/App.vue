@@ -5,7 +5,7 @@ import Decimal from "break_eternity.js";
 import { Listener } from "./utils/listeners";
 
 let food = new Listener(new Decimal(0), game.food);
-let total_food = new Listener(new Decimal(0), game.statistics.total_food);
+let total_food = new Listener(new Decimal(0), game.food.total);
 let humans = new Listener(new Decimal(0), game.humans);
 
 onBeforeUnmount(() => {
