@@ -3,17 +3,22 @@ import Decimal from "break_eternity.js";
 
 export class Game {
   private readonly _food: Rater = new Rater(Decimal.dZero);
-  private readonly _humans: Observer<Decimal> = new Observer(new Decimal(0));
+  private readonly _humans: Rater = new Rater(Decimal.dZero);
 
   public constructor() {
-    setInterval(() => this.food.tick(), 1000);
+    setInterval(() => this.tick(), 1000);
+  }
+
+  private tick() {
+    this.food.tick();
+    this.humans.tick();
   }
 
   public increment_food() {
     this.food = this.food.value.plus(1);
   }
 
-  public get humans(): Observer<Decimal> {
+  public get humans(): Rater {
     return this._humans;
   }
 
