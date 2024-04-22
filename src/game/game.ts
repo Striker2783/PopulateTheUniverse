@@ -45,10 +45,20 @@ export class Game {
   public increment(resource_name: ResourceNames) {
     const resource_data = Resources[resource_name];
     const resource = this.resources.get(resource_name)!;
-    if (resource_data.cost === undefined) {
+    const cost = resource_data.cost;
+    if (cost === undefined) {
       resource.value = resource.value.plus(1);
       return;
     }
+    for (const [key, value] of Object.entries(cost!)) {
+      if (this.resources.get(key as ResourceNames)!.value.lessThan(value))
+        return;
+    }
+    for (const [key, value] of Object.entries(cost!)) {
+      const needed_resource = this.resources.get(key as ResourceNames)!;
+      needed_resource.value = needed_resource.value.minus(value);
+    }
+    resource.value = resource.value.add(1);
   }
 
   public increment_humans() {
