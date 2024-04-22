@@ -1,4 +1,4 @@
-# populate_the_universe
+# Populate The Universe
 
 This is an incremental game whose goal is to populate humanity throughout the universe. It will include many different stages starting from primitive stage to universe stage.
 
