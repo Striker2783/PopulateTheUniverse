@@ -1,9 +1,13 @@
-import { Observer, Totaller } from "@/utils/values";
+import { Observer, Rater, Totaller } from "@/utils/values";
 import Decimal from "break_eternity.js";
 
 export class Game {
-  private readonly _food: Totaller = new Totaller(Decimal.dZero);
+  private readonly _food: Rater = new Rater(Decimal.dZero);
   private readonly _humans: Observer<Decimal> = new Observer(new Decimal(0));
+
+  public constructor() {
+    setInterval(() => this.food.tick(), 1000);
+  }
 
   public increment_food() {
     this.food = this.food.value.plus(1);
@@ -21,7 +25,7 @@ export class Game {
     this._food.value = v;
   }
 
-  public get food(): Totaller {
+  public get food(): Rater {
     return this._food;
   }
 
