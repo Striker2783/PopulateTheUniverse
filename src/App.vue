@@ -2,34 +2,23 @@
 import { onBeforeUnmount, ref } from "vue";
 import game from "./game/game";
 import Decimal from "break_eternity.js";
+import { Listener } from "./utils/listeners";
 
-let food = ref(new Decimal(0));
-let total_food = ref(Decimal.dZero);
-let humans = ref(new Decimal(0));
-
-let food_func = game.food.addListener((v) => {
-  food.value = v;
-});
-
-let human_func = game.humans.addListener((v) => {
-  humans.value = v;
-});
-
-let total_food_func = game.statistics.total_food.addListener((v) => {
-  total_food.value = v;
-});
+let food = new Listener(new Decimal(0), game.food);
+let total_food = new Listener(new Decimal(0), game.statistics.total_food);
+let humans = new Listener(new Decimal(0), game.humans);
 
 onBeforeUnmount(() => {
-  food_func();
-  human_func();
-  total_food_func();
+  food.disconnect();
+  humans.disconnect();
+  total_food.disconnect();
 });
 </script>
 
 <template>
-  <h1>Food: {{ food }}</h1>
+  <h1>Food: {{ food.value }}</h1>
   <button @click="game.increment_food()">Increment</button>
-  <h1>Total Food: {{ total_food }}</h1>
-  <h1>Humans: {{ humans }}</h1>
+  <h1>Total Food: {{ total_food.value }}</h1>
+  <h1>Humans: {{ humans.value }}</h1>
   <button @click="game.increment_humans()">Increment</button>
 </template>

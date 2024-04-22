@@ -20,6 +20,7 @@ export class Observer<T> {
   /**
    * Adds a listener and calls it.
    * @param listener Listener
+   * @returns Disconnect function
    */
   public addListener(listener: Listener<T>): () => void {
     this.listeners.set(listener, true);
