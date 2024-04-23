@@ -9969,23 +9969,32 @@ const Resources = {
   }
 };
 class Resource extends Rater {
-  constructor(resource_data) {
+  constructor(resource_data, name) {
     super(new Decimal(resource_data.default_value || 0));
     __publicField(this, "data");
-    __publicField(this, "_onDelay", new Observer(false));
+    __publicField(this, "name");
     this.data = resource_data;
-  }
-  get onDelay() {
-    return this._onDelay;
-  }
-  set onDelay(value) {
-    this._onDelay = value;
-  }
-  get canIncrement() {
-    return this.data.increment ? this.data.increment.can : true;
+    this.name = name;
   }
   get delay() {
-    return this.data.increment ? this.data.increment.delay || 1 : 1;
+    return this.data.increment ? this.data.increment.v || 1 : 1;
+  }
+  get cost() {
+    return this.data.cost || {};
+  }
+  get can_increment() {
+    if (!this.data.increment)
+      return true;
+    if (this.data.increment.can === void 0)
+      return true;
+    return this.data.increment.can;
+  }
+  get increment() {
+    if (!this.data.increment)
+      return 1;
+    if (this.data.increment && !this.data.increment.can)
+      return 0;
+    return this.data.increment.v || 1;
   }
 }
 class Game {
@@ -9997,11 +10006,27 @@ class Game {
     __publicField(this, "current_gathering");
     this._resources = /* @__PURE__ */ new Map();
     for (const [key, resource] of Object.entries(Resources)) {
-      this._resources.set(key, new Resource(resource));
+      this._resources.set(
+        key,
+        new Resource(resource, key)
+      );
     }
     setInterval(() => {
       this.tick();
     }, 1e3);
+    let last_update = Date.now();
+    setInterval(() => {
+      const dt = (Date.now() - last_update) / 1e3;
+      last_update = Date.now();
+      this.resources.forEach((element) => {
+      });
+      if (this.current_gathering) {
+        this.buy_resource(
+          this.current_gathering,
+          Decimal.mul(this.current_gathering.increment, dt)
+        );
+      }
+    }, 50);
   }
   // #endregion Constructors (1)
   // #region Public Getters And Setters (1)
@@ -10010,56 +10035,40 @@ class Game {
   }
   // #endregion Public Getters And Setters (1)
   // #region Public Methods (1)
+  add_humans(resource_name, amount = 1) {
+    this.resources.get(resource_name);
+  }
   start_increment(resource_name) {
-    if (this.current_gathering) {
-      clearInterval(this.current_gathering.interval_id);
-      this.current_gathering = void 0;
-    }
-    const interval = setInterval(() => {
-      this.get_resource(resource_name);
-    }, this.resources.get(resource_name).delay * 1e3);
-    this.current_gathering = {
-      interval_id: interval,
-      name: resource_name
-    };
+    const resource = this.resources.get(resource_name);
+    if (!resource.can_increment)
+      return;
+    this.current_gathering = resource;
   }
   // #endregion Public Methods (1)
   // #region Private Methods (2)
-  can_afford(amount, cost) {
-    if (!cost)
-      return true;
+  can_afford(amount, resource) {
+    const cost = resource.cost;
     for (const [key, value] of Object.entries(cost)) {
-      if (this.resources.get(key).value.div(amount).lessThan(value))
+      const resource2 = this.resources.get(key);
+      if (resource2.value.div(amount).lessThan(value))
         return false;
     }
     return true;
   }
-  get_resource(resource_name, amount = 1) {
-    const resource_data = Resources[resource_name];
-    const resource = this.resources.get(resource_name);
-    if (!resource.canIncrement)
-      return;
-    if (resource.onDelay.value)
-      return;
-    const cost = resource_data.cost;
-    if (cost === void 0) {
-      resource.value = resource.value.plus(1);
-    } else {
-      if (!this.can_afford(amount, cost))
-        return;
-      for (const [key, value] of Object.entries(cost)) {
-        const needed_resource = this.resources.get(key);
-        needed_resource.value = needed_resource.value.minus(
-          new Decimal(value).times(amount)
-        );
-      }
-      resource.value = resource.value.add(1);
+  no_check_buy_resource(resource, amount) {
+    const cost = resource.cost;
+    for (const [key, value] of Object.entries(cost)) {
+      const needed_resource = this.resources.get(key);
+      needed_resource.value = needed_resource.value.minus(
+        new Decimal(value).times(amount)
+      );
     }
-    if (resource.delay == 0)
+    resource.value = resource.value.add(amount);
+  }
+  buy_resource(resource, amount = 1) {
+    if (!this.can_afford(amount, resource))
       return;
-    setTimeout(() => {
-      resource.onDelay.value = false;
-    }, resource.delay * 1e3 - 100);
+    this.no_check_buy_resource(resource, amount);
   }
   tick() {
     this._resources.forEach((field) => {
@@ -10074,22 +10083,22 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   setup(__props) {
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(Fragment, null, [
-        createBaseVNode("h1", null, "Food: " + toDisplayString(unref(game).resources.get("food").value), 1),
+        createBaseVNode("h1", null, "Food: " + toDisplayString(unref(game).resources.get("food").value.floor()), 1),
         createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("food").rate.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
           onClick: _cache[0] || (_cache[0] = ($event) => unref(game).start_increment("food"))
         }, "Increment"),
-        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).resources.get("human").value), 1),
+        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).resources.get("human").value.floor()), 1),
         createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("human").rate.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
           onClick: _cache[1] || (_cache[1] = ($event) => unref(game).start_increment("human"))
         }, "Increment"),
-        createBaseVNode("h1", null, "Wood: " + toDisplayString(unref(game).resources.get("wood").value), 1),
+        createBaseVNode("h1", null, "Wood: " + toDisplayString(unref(game).resources.get("wood").value.floor()), 1),
         createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("wood").rate.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
           onClick: _cache[2] || (_cache[2] = ($event) => unref(game).start_increment("wood"))
         }, "Increment"),
-        createBaseVNode("h1", null, "Stone: " + toDisplayString(unref(game).resources.get("stone").value), 1),
+        createBaseVNode("h1", null, "Stone: " + toDisplayString(unref(game).resources.get("stone").value.floor()), 1),
         createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("stone").rate.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
           onClick: _cache[3] || (_cache[3] = ($event) => unref(game).start_increment("stone"))
@@ -10103,10 +10112,10 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
   setup(__props) {
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(Fragment, null, [
-        createBaseVNode("h1", null, "Total Food " + toDisplayString(unref(game).resources.get("food").total.value), 1),
-        createBaseVNode("h1", null, "Total Humans " + toDisplayString(unref(game).resources.get("human").total.value), 1),
-        createBaseVNode("h1", null, "Total Wood " + toDisplayString(unref(game).resources.get("wood").total.value), 1),
-        createBaseVNode("h1", null, "Total Stone " + toDisplayString(unref(game).resources.get("stone").total.value), 1)
+        createBaseVNode("h1", null, "Total Food " + toDisplayString(unref(game).resources.get("food").total.value.floor()), 1),
+        createBaseVNode("h1", null, "Total Humans " + toDisplayString(unref(game).resources.get("human").total.value.floor()), 1),
+        createBaseVNode("h1", null, "Total Wood " + toDisplayString(unref(game).resources.get("wood").total.value.floor()), 1),
+        createBaseVNode("h1", null, "Total Stone " + toDisplayString(unref(game).resources.get("stone").total.value.floor()), 1)
       ], 64);
     };
   }
@@ -10141,4 +10150,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-BDykjyKb.js.map
+//# sourceMappingURL=index-BXoL2Yfg.js.map
