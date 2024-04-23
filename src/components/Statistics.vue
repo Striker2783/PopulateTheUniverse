@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import game from "@/game/game";
-import { Listener } from "@/utils/listeners";
-import { onBeforeUnmount } from "vue";
 </script>
 
 <template>

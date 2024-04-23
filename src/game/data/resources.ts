@@ -4,10 +4,13 @@ export type ResourceCost = {
   [Key in ResourceNames]?: DecimalSource;
 };
 
-export type Resource = {
+export type ResourceData = {
   cost?: ResourceCost;
   default_value?: DecimalSource;
-  canIncrement?: boolean;
+  increment?: {
+    delay?: number;
+    can?: boolean;
+  };
 };
 
 export type ResourceNames =
@@ -17,7 +20,7 @@ export type ResourceNames =
   | "human"
   | "wooden spear";
 
-export const Resources: Record<ResourceNames, Resource> = {
+export const Resources: Record<ResourceNames, ResourceData> = {
   wood: {},
   stone: {},
   food: {},
