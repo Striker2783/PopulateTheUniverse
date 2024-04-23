@@ -9891,13 +9891,19 @@ Decimal.fromMantissaExponent_noNormalize;
 class Observer {
   constructor(value) {
     __publicField(this, "_value");
-    this._value = ref(value);
+    __publicField(this, "_ref");
+    this._value = value;
+    this._ref = ref(value);
   }
   get value() {
-    return this._value.value;
+    return this._value;
   }
   set value(v) {
-    this._value.value = v;
+    this._value = v;
+    this._ref.value = this._value;
+  }
+  get ref() {
+    return this._ref;
   }
 }
 class Totaller extends Observer {
@@ -9912,7 +9918,7 @@ class Totaller extends Observer {
     super.value = v;
   }
   get value() {
-    return this._value.value;
+    return this._value;
   }
   get total() {
     return this._total;
@@ -10082,23 +10088,23 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
   setup(__props) {
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(Fragment, null, [
-        createBaseVNode("h1", null, "Food: " + toDisplayString(unref(game).resources.get("food").value.floor()), 1),
-        createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("food").rate.value.toFixed(2)) + "/s", 1),
+        createBaseVNode("h1", null, "Food: " + toDisplayString(unref(game).resources.get("food").ref.value.floor()), 1),
+        createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("food").rate.ref.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
           onClick: _cache[0] || (_cache[0] = ($event) => unref(game).start_increment("food"))
         }, "Increment"),
-        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).resources.get("human").value.floor()), 1),
-        createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("human").rate.value.toFixed(2)) + "/s", 1),
+        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).resources.get("human").ref.value.floor()), 1),
+        createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("human").rate.ref.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
           onClick: _cache[1] || (_cache[1] = ($event) => unref(game).start_increment("human"))
         }, "Increment"),
-        createBaseVNode("h1", null, "Wood: " + toDisplayString(unref(game).resources.get("wood").value.floor()), 1),
-        createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("wood").rate.value.toFixed(2)) + "/s", 1),
+        createBaseVNode("h1", null, "Wood: " + toDisplayString(unref(game).resources.get("wood").ref.value.floor()), 1),
+        createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("wood").rate.ref.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
           onClick: _cache[2] || (_cache[2] = ($event) => unref(game).start_increment("wood"))
         }, "Increment"),
-        createBaseVNode("h1", null, "Stone: " + toDisplayString(unref(game).resources.get("stone").value.floor()), 1),
-        createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("stone").rate.value.toFixed(2)) + "/s", 1),
+        createBaseVNode("h1", null, "Stone: " + toDisplayString(unref(game).resources.get("stone").ref.value.floor()), 1),
+        createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("stone").rate.ref.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
           onClick: _cache[3] || (_cache[3] = ($event) => unref(game).start_increment("stone"))
         }, "Increment")
@@ -10111,10 +10117,10 @@ const _sfc_main$1 = /* @__PURE__ */ defineComponent({
   setup(__props) {
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(Fragment, null, [
-        createBaseVNode("h1", null, "Total Food " + toDisplayString(unref(game).resources.get("food").total.value.floor()), 1),
-        createBaseVNode("h1", null, "Total Humans " + toDisplayString(unref(game).resources.get("human").total.value.floor()), 1),
-        createBaseVNode("h1", null, "Total Wood " + toDisplayString(unref(game).resources.get("wood").total.value.floor()), 1),
-        createBaseVNode("h1", null, "Total Stone " + toDisplayString(unref(game).resources.get("stone").total.value.floor()), 1)
+        createBaseVNode("h1", null, "Total Food " + toDisplayString(unref(game).resources.get("food").total.ref.value.floor()), 1),
+        createBaseVNode("h1", null, " Total Humans " + toDisplayString(unref(game).resources.get("human").total.ref.value.floor()), 1),
+        createBaseVNode("h1", null, "Total Wood " + toDisplayString(unref(game).resources.get("wood").total.ref.value.floor()), 1),
+        createBaseVNode("h1", null, " Total Stone " + toDisplayString(unref(game).resources.get("stone").total.ref.value.floor()), 1)
       ], 64);
     };
   }
@@ -10149,4 +10155,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-CugSigao.js.map
+//# sourceMappingURL=index-BCoGWj7z.js.map
