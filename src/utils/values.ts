@@ -1,47 +1,21 @@
 import Decimal from "break_eternity.js";
+import { ref, type Ref, type UnwrapRef } from "vue";
 
 type Listener<T> = (a: T) => void;
 
 export class Observer<T> {
-  protected _value: T;
-  private readonly listeners: Map<Listener<T>, boolean> = new Map();
+  protected _value: Ref<UnwrapRef<T>>;
 
   public constructor(value: T) {
-    this._value = value;
+    this._value = ref(value);
   }
 
-  public get value() {
-    return this._value;
+  public get value(): UnwrapRef<T> {
+    return this._value.value;
   }
 
   public set value(v: T) {
-    this._value = v;
-    this.callAll();
-  }
-
-  /**
-   * Adds a listener and calls it.
-   * @param listener Listener
-   * @returns Disconnect function
-   */
-  public addListener(listener: Listener<T>): () => void {
-    this.listeners.set(listener, true);
-    listener(this._value);
-    return () => this.removeListener(listener);
-  }
-
-  /**
-   * Removes a listener
-   * @param listener
-   */
-  public removeListener(listener: Listener<T>) {
-    this.listeners.delete(listener);
-  }
-
-  protected callAll() {
-    this.listeners.forEach((_, k) => {
-      k(this._value);
-    });
+    this._value.value = v as UnwrapRef<T>;
   }
 }
 
@@ -57,7 +31,7 @@ export class Totaller extends Observer<Decimal> {
     super.value = v;
   }
   public get value() {
-    return this._value;
+    return this._value.value;
   }
   public get total() {
     return this._total;
