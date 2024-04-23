@@ -13,7 +13,7 @@ export class Game {
 
   private readonly _resources: Map<ResourceNames, Resource>;
 
-  private current_gathering?: Resource;
+  private current_gathering?: { t: number; r: Resource };
 
   // #endregion Properties (2)
 
@@ -37,12 +37,6 @@ export class Game {
       this.resources.forEach((element) => {
         // element.value = element.value.plus(element.base_automate.mul(dt));
       });
-      if (this.current_gathering) {
-        this.buy_resource(
-          this.current_gathering,
-          Decimal.mul(this.current_gathering.increment, dt)
-        );
-      }
     }, 50);
   }
 
@@ -64,9 +58,17 @@ export class Game {
 
   public start_increment(resource_name: ResourceNames) {
     const resource = this.resources.get(resource_name)!;
-    if (!resource.can_increment) return;
-
-    this.current_gathering = resource;
+    if (this.current_gathering) {
+      clearInterval(this.current_gathering.t);
+      this.current_gathering = undefined;
+    }
+    const interval = setInterval(() => {
+      this.buy_resource(resource, resource.increment);
+    }, 1000);
+    this.current_gathering = {
+      t: interval,
+      r: resource,
+    };
   }
 
   // #endregion Public Methods (1)
