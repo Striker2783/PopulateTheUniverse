@@ -9976,18 +9976,27 @@ class Resource extends Rater {
   set onDelay(value) {
     this._onDelay = value;
   }
+  get canIncrement() {
+    return this.data.increment ? this.data.increment.can : true;
+  }
+  get delay() {
+    return this.data.increment ? this.data.increment.delay || 1 : 1;
+  }
 }
 class Game {
-  // #endregion Properties (1)
+  // #endregion Properties (2)
   // #region Constructors (1)
   constructor() {
-    // #region Properties (1)
+    // #region Properties (2)
     __publicField(this, "_resources");
+    __publicField(this, "current_gathering");
     this._resources = /* @__PURE__ */ new Map();
     for (const [key, resource] of Object.entries(Resources)) {
       this._resources.set(key, new Resource(resource));
     }
-    setInterval(() => this.tick(), 1e3);
+    setInterval(() => {
+      this.tick();
+    }, 1e3);
   }
   // #endregion Constructors (1)
   // #region Public Getters And Setters (1)
@@ -9996,43 +10005,63 @@ class Game {
   }
   // #endregion Public Getters And Setters (1)
   // #region Public Methods (1)
-  increment(resource_name) {
+  start_increment(resource_name) {
+    if (this.current_gathering) {
+      clearInterval(this.current_gathering.interval_id);
+      this.current_gathering = void 0;
+    }
+    const interval = setInterval(() => {
+      this.get_resource(resource_name);
+    }, this.resources.get(resource_name).delay * 1e3);
+    this.current_gathering = {
+      interval_id: interval,
+      name: resource_name
+    };
+  }
+  // #endregion Public Methods (1)
+  // #region Private Methods (2)
+  can_afford(amount, cost) {
+    if (!cost)
+      return true;
+    for (const [key, value] of Object.entries(cost)) {
+      if (this.resources.get(key).value.div(amount).lessThan(value))
+        return false;
+    }
+    return true;
+  }
+  get_resource(resource_name, amount = 1) {
     const resource_data = Resources[resource_name];
     const resource = this.resources.get(resource_name);
-    if (resource_data.increment !== void 0 && !resource_data.increment.can)
+    if (!resource.canIncrement)
       return;
     if (resource.onDelay.value)
       return;
-    const delay = resource_data.increment === void 0 ? 1 : resource_data.increment.delay || 1;
     const cost = resource_data.cost;
     if (cost === void 0) {
       resource.value = resource.value.plus(1);
     } else {
-      for (const [key, value] of Object.entries(cost)) {
-        if (this.resources.get(key).value.lessThan(value))
-          return;
-      }
+      if (!this.can_afford(amount, cost))
+        return;
       for (const [key, value] of Object.entries(cost)) {
         const needed_resource = this.resources.get(key);
-        needed_resource.value = needed_resource.value.minus(value);
+        needed_resource.value = needed_resource.value.minus(
+          new Decimal(value).times(amount)
+        );
       }
       resource.value = resource.value.add(1);
     }
-    if (delay == 0)
+    if (resource.delay == 0)
       return;
-    resource.onDelay.value = true;
     setTimeout(() => {
       resource.onDelay.value = false;
-    }, delay * 1e3);
+    }, resource.delay * 1e3 - 100);
   }
-  // #endregion Public Methods (1)
-  // #region Private Methods (1)
   tick() {
     this._resources.forEach((field) => {
       field.tick();
     });
   }
-  // #endregion Private Methods (1)
+  // #endregion Private Methods (2)
 }
 const game = new Game();
 const _sfc_main$2 = /* @__PURE__ */ defineComponent({
@@ -10043,22 +10072,22 @@ const _sfc_main$2 = /* @__PURE__ */ defineComponent({
         createBaseVNode("h1", null, "Food: " + toDisplayString(unref(game).resources.get("food").value), 1),
         createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("food").rate.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
-          onClick: _cache[0] || (_cache[0] = ($event) => unref(game).increment("food"))
+          onClick: _cache[0] || (_cache[0] = ($event) => unref(game).start_increment("food"))
         }, "Increment"),
         createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).resources.get("human").value), 1),
         createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("human").rate.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
-          onClick: _cache[1] || (_cache[1] = ($event) => unref(game).increment("human"))
+          onClick: _cache[1] || (_cache[1] = ($event) => unref(game).start_increment("human"))
         }, "Increment"),
         createBaseVNode("h1", null, "Wood: " + toDisplayString(unref(game).resources.get("wood").value), 1),
         createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("wood").rate.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
-          onClick: _cache[2] || (_cache[2] = ($event) => unref(game).increment("wood"))
+          onClick: _cache[2] || (_cache[2] = ($event) => unref(game).start_increment("wood"))
         }, "Increment"),
         createBaseVNode("h1", null, "Stone: " + toDisplayString(unref(game).resources.get("stone").value), 1),
         createBaseVNode("div", null, "Rate " + toDisplayString(unref(game).resources.get("stone").rate.value.toFixed(2)) + "/s", 1),
         createBaseVNode("button", {
-          onClick: _cache[3] || (_cache[3] = ($event) => unref(game).increment("stone"))
+          onClick: _cache[3] || (_cache[3] = ($event) => unref(game).start_increment("stone"))
         }, "Increment")
       ], 64);
     };
