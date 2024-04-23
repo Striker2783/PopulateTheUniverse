@@ -30,7 +30,7 @@ export class Totaller extends Observer<Decimal> {
       this._total.value = this._total.value.add(v.minus(this.value));
     super.value = v;
   }
-  public get value() {
+  public get value(): UnwrapRef<Decimal> {
     return this._value.value;
   }
   public get total() {

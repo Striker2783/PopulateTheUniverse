@@ -1,5 +1,5 @@
 import { Rater } from "@/utils/values";
-import Decimal from "break_eternity.js";
+import Decimal, { type DecimalSource } from "break_eternity.js";
 import {
   Resources,
   type ResourceCost,
@@ -13,7 +13,7 @@ export class Game {
 
   private readonly _resources: Map<ResourceNames, Resource>;
 
-  private current_gathering?: { name: ResourceNames; interval_id: number };
+  private current_gathering?: Resource;
 
   // #endregion Properties (2)
 
@@ -22,11 +22,28 @@ export class Game {
   public constructor() {
     this._resources = new Map();
     for (const [key, resource] of Object.entries(Resources)) {
-      this._resources.set(key as ResourceNames, new Resource(resource));
+      this._resources.set(
+        key as ResourceNames,
+        new Resource(resource, key as ResourceNames)
+      );
     }
     setInterval(() => {
       this.tick();
     }, 1000);
+    let last_update = Date.now();
+    setInterval(() => {
+      const dt = (Date.now() - last_update) / 1000;
+      last_update = Date.now();
+      this.resources.forEach((element) => {
+        // element.value = element.value.plus(element.base_automate.mul(dt));
+      });
+      if (this.current_gathering) {
+        this.buy_resource(
+          this.current_gathering,
+          Decimal.mul(this.current_gathering.increment, dt)
+        );
+      }
+    }, 50);
   }
 
   // #endregion Constructors (1)
@@ -41,28 +58,22 @@ export class Game {
 
   // #region Public Methods (1)
 
+  public add_humans(resource_name: ResourceNames, amount: DecimalSource = 1) {
+    const resource = this.resources.get(resource_name)!;
+  }
+
   public start_increment(resource_name: ResourceNames) {
     const resource = this.resources.get(resource_name)!;
     if (!resource.can_increment) return;
 
-    if (this.current_gathering) {
-      clearInterval(this.current_gathering.interval_id);
-      this.current_gathering = undefined;
-    }
-    const interval = setInterval(() => {
-      this.get_resource(resource_name);
-    }, this.resources.get(resource_name)!.delay * 1000);
-    this.current_gathering = {
-      interval_id: interval,
-      name: resource_name,
-    };
+    this.current_gathering = resource;
   }
 
   // #endregion Public Methods (1)
 
   // #region Private Methods (2)
 
-  private can_afford(amount: number, resource: Resource) {
+  private can_afford(amount: DecimalSource, resource: Resource) {
     const cost = resource.cost;
     for (const [key, value] of Object.entries(cost)) {
       const resource = this.resources.get(key as ResourceNames)!;
@@ -72,7 +83,7 @@ export class Game {
     return true;
   }
 
-  private no_check_buy_resource(resource: Resource, amount: number) {
+  private no_check_buy_resource(resource: Resource, amount: DecimalSource) {
     const cost = resource.cost;
 
     for (const [key, value] of Object.entries(cost)) {
@@ -84,12 +95,9 @@ export class Game {
     resource.value = resource.value.add(amount);
   }
 
-  private get_resource(resource_name: ResourceNames, amount: number = 1) {
-    const resource = this.resources.get(resource_name)!;
-
+  private buy_resource(resource: Resource, amount: DecimalSource = 1) {
     if (!this.can_afford(amount, resource)) return;
     this.no_check_buy_resource(resource, amount);
-    resource.value = resource.value.add(amount);
   }
 
   private tick() {
