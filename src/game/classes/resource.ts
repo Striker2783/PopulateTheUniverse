@@ -15,4 +15,12 @@ export class Resource extends Rater {
     super(new Decimal(resource_data.default_value || 0));
     this.data = resource_data;
   }
+
+  public get canIncrement() {
+    return this.data.increment ? this.data.increment.can : true;
+  }
+
+  public get delay() {
+    return this.data.increment ? this.data.increment.delay || 1 : 1;
+  }
 }
