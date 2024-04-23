@@ -8,10 +8,9 @@ export type ResourceData = {
   cost?: ResourceCost;
   default_value?: DecimalSource;
   increment?: {
-    delay?: number;
+    v?: DecimalSource;
     can?: boolean;
   };
-  human_automation?: { can?: boolean; per_second?: DecimalSource };
 };
 
 export type ResourceNames =
@@ -21,7 +20,7 @@ export type ResourceNames =
   | "human"
   | "wooden spear";
 
-export const Resources: Record<ResourceNames, ResourceData> = {
+export const Resources: { [key in ResourceNames]: ResourceData } = {
   wood: {},
   stone: {},
   food: {},
