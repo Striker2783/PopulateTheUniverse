@@ -54,7 +54,7 @@ var __publicField = (obj, key, value) => {
 // @__NO_SIDE_EFFECTS__
 function makeMap(str, expectsLowerCase) {
   const set2 = new Set(str.split(","));
-  return (val) => set2.has(val);
+  return expectsLowerCase ? (val) => set2.has(val.toLowerCase()) : (val) => set2.has(val);
 }
 const EMPTY_OBJ = {};
 const EMPTY_ARR = [];
@@ -4528,6 +4528,11 @@ function baseCreateRenderer(options, createHydrationFns) {
   };
   let hydrate;
   let hydrateNode;
+  if (createHydrationFns) {
+    [hydrate, hydrateNode] = createHydrationFns(
+      internals
+    );
+  }
   return {
     render,
     hydrate,
@@ -10136,3 +10141,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
+//# sourceMappingURL=index-BDykjyKb.js.map
