@@ -1,21 +1,26 @@
 import Decimal from "break_eternity.js";
 import { ref, type Ref, type UnwrapRef } from "vue";
 
-type Listener<T> = (a: T) => void;
-
 export class Observer<T> {
-  protected _value: Ref<UnwrapRef<T>>;
+  protected _value: T;
+  private _ref: Ref<UnwrapRef<T>>;
 
   public constructor(value: T) {
-    this._value = ref(value);
+    this._value = value;
+    this._ref = ref(value) as Ref<UnwrapRef<T>>;
   }
 
-  public get value(): UnwrapRef<T> {
-    return this._value.value;
+  public get value(): T {
+    return this._value;
   }
 
   public set value(v: T) {
-    this._value.value = v as UnwrapRef<T>;
+    this._value = v;
+    this._ref.value = this._value as UnwrapRef<T>;
+  }
+
+  public get ref() {
+    return this._ref;
   }
 }
 
@@ -30,8 +35,8 @@ export class Totaller extends Observer<Decimal> {
       this._total.value = this._total.value.add(v.minus(this.value));
     super.value = v;
   }
-  public get value(): UnwrapRef<Decimal> {
-    return this._value.value;
+  public get value() {
+    return this._value;
   }
   public get total() {
     return this._total;
