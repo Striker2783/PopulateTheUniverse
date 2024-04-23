@@ -42,6 +42,9 @@ export class Game {
   // #region Public Methods (1)
 
   public start_increment(resource_name: ResourceNames) {
+    const resource = this.resources.get(resource_name)!;
+    if (!resource.can_increment) return;
+
     if (this.current_gathering) {
       clearInterval(this.current_gathering.interval_id);
       this.current_gathering = undefined;
@@ -59,46 +62,34 @@ export class Game {
 
   // #region Private Methods (2)
 
-  private can_afford(amount: number, cost?: ResourceCost) {
-    if (!cost) return true;
-    for (const [key, value] of Object.entries(cost!)) {
+  private can_afford(amount: number, resource: Resource) {
+    const cost = resource.cost;
+    for (const [key, value] of Object.entries(cost)) {
+      const resource = this.resources.get(key as ResourceNames)!;
       // Can afford single resource
-      if (
-        this.resources
-          .get(key as ResourceNames)!
-          .value.div(amount)
-          .lessThan(value)
-      )
-        return false;
+      if (resource.value.div(amount).lessThan(value)) return false;
     }
     return true;
   }
 
+  private no_check_buy_resource(resource: Resource, amount: number) {
+    const cost = resource.cost;
+
+    for (const [key, value] of Object.entries(cost)) {
+      const needed_resource = this.resources.get(key as ResourceNames)!;
+      needed_resource.value = needed_resource.value.minus(
+        new Decimal(value).times(amount)
+      );
+    }
+    resource.value = resource.value.add(amount);
+  }
+
   private get_resource(resource_name: ResourceNames, amount: number = 1) {
-    const resource_data = Resources[resource_name];
     const resource = this.resources.get(resource_name)!;
 
-    if (!resource.canIncrement) return;
-    if (resource.onDelay.value) return;
-
-    const cost = resource_data.cost;
-    if (cost === undefined) {
-      resource.value = resource.value.plus(1);
-    } else {
-      if (!this.can_afford(amount, cost)) return;
-      for (const [key, value] of Object.entries(cost!)) {
-        const needed_resource = this.resources.get(key as ResourceNames)!;
-        needed_resource.value = needed_resource.value.minus(
-          new Decimal(value).times(amount)
-        );
-      }
-      resource.value = resource.value.add(1);
-    }
-
-    if (resource.delay == 0) return;
-    setTimeout(() => {
-      resource.onDelay.value = false;
-    }, resource.delay * 1000 - 100);
+    if (!this.can_afford(amount, resource)) return;
+    this.no_check_buy_resource(resource, amount);
+    resource.value = resource.value.add(amount);
   }
 
   private tick() {

@@ -11,6 +11,7 @@ export type ResourceData = {
     delay?: number;
     can?: boolean;
   };
+  human_automation?: { can?: boolean; per_second?: DecimalSource };
 };
 
 export type ResourceNames =
