@@ -10014,18 +10014,9 @@ class Game {
     setInterval(() => {
       this.tick();
     }, 1e3);
-    let last_update = Date.now();
     setInterval(() => {
-      const dt = (Date.now() - last_update) / 1e3;
-      last_update = Date.now();
       this.resources.forEach((element) => {
       });
-      if (this.current_gathering) {
-        this.buy_resource(
-          this.current_gathering,
-          Decimal.mul(this.current_gathering.increment, dt)
-        );
-      }
     }, 50);
   }
   // #endregion Constructors (1)
@@ -10040,9 +10031,17 @@ class Game {
   }
   start_increment(resource_name) {
     const resource = this.resources.get(resource_name);
-    if (!resource.can_increment)
-      return;
-    this.current_gathering = resource;
+    if (this.current_gathering) {
+      clearInterval(this.current_gathering.t);
+      this.current_gathering = void 0;
+    }
+    const interval = setInterval(() => {
+      this.buy_resource(resource, resource.increment);
+    }, 1e3);
+    this.current_gathering = {
+      t: interval,
+      r: resource
+    };
   }
   // #endregion Public Methods (1)
   // #region Private Methods (2)
@@ -10150,4 +10149,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-BXoL2Yfg.js.map
+//# sourceMappingURL=index-CugSigao.js.map
