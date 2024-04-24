@@ -46,7 +46,7 @@ var __publicField = (obj, key, value) => {
   }
 })();
 /**
-* @vue/shared v3.4.24
+* @vue/shared v3.4.25
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
 * @license MIT
 **/
@@ -228,7 +228,7 @@ const stringifySymbol = (v, i = "") => {
   );
 };
 /**
-* @vue/reactivity v3.4.24
+* @vue/reactivity v3.4.25
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
 * @license MIT
 **/
@@ -1197,7 +1197,7 @@ function proxyRefs(objectWithRefs) {
   return isReactive(objectWithRefs) ? objectWithRefs : new Proxy(objectWithRefs, shallowUnwrapHandlers);
 }
 /**
-* @vue/runtime-core v3.4.24
+* @vue/runtime-core v3.4.25
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
 * @license MIT
 **/
@@ -2792,7 +2792,7 @@ function inject(key, defaultValue, treatDefaultAsFactory = false) {
       ;
   }
 }
-const internalObjectProto = /* @__PURE__ */ Object.create(null);
+const internalObjectProto = {};
 const createInternalObject = () => Object.create(internalObjectProto);
 const isInternalObject = (obj) => Object.getPrototypeOf(obj) === internalObjectProto;
 function initProps(instance, rawProps, isStateful, isSSR = false) {
@@ -5241,9 +5241,9 @@ const computed = (getterOrOptions, debugOptions) => {
   const c = computed$1(getterOrOptions, debugOptions, isInSSRComponentSetup);
   return c;
 };
-const version = "3.4.24";
+const version = "3.4.25";
 /**
-* @vue/runtime-dom v3.4.24
+* @vue/runtime-dom v3.4.25
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
 * @license MIT
 **/
@@ -10155,4 +10155,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-BCoGWj7z.js.map
+//# sourceMappingURL=index-CxxjqWoV.js.map
