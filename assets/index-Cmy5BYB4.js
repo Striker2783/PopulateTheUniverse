@@ -9888,6 +9888,22 @@ FC = Decimal.fromComponents;
 FC_NN = Decimal.fromComponents_noNormalize;
 Decimal.fromMantissaExponent;
 Decimal.fromMantissaExponent_noNormalize;
+const Resources = {
+  wood: {},
+  stone: {},
+  food: {},
+  human: {
+    cost: {
+      food: 10
+    }
+  },
+  "wooden spear": {
+    cost: {
+      wood: 10,
+      stone: 10
+    }
+  }
+};
 class Observer {
   constructor(value) {
     __publicField(this, "_value");
@@ -9958,22 +9974,6 @@ class Rater extends Totaller {
     this._max_changes = v;
   }
 }
-const Resources = {
-  wood: {},
-  stone: {},
-  food: {},
-  human: {
-    cost: {
-      food: 10
-    }
-  },
-  "wooden spear": {
-    cost: {
-      wood: 10,
-      stone: 10
-    }
-  }
-};
 class Resource extends Rater {
   constructor(resource_data, name) {
     super(new Decimal(resource_data.default_value || 0));
@@ -10155,4 +10155,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-CxxjqWoV.js.map
+//# sourceMappingURL=index-Cmy5BYB4.js.map
