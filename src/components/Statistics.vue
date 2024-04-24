@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import game from "@/game/game";
+import game from "game/game";
 </script>
 
 <template>
