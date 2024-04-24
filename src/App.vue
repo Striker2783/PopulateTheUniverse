@@ -2,7 +2,6 @@
 import { ref } from "vue";
 import StageOnePage from "./components/StageOnePage.vue";
 import Statistics from "./components/Statistics.vue";
-import game from "./game/game";
 
 enum Pages {
   Main,
