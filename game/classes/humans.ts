@@ -2,6 +2,7 @@ import { Observer, Rater, Totaller } from "game/utils/values";
 import { Resource } from "./resource";
 import Decimal, { type DecimalSource } from "break_eternity.js";
 import { HUMANS } from "game/data/human";
+import type { ResourceNames } from "game/data/resources";
 
 export class Humans {
   // #region Properties (3)
@@ -18,25 +19,6 @@ export class Humans {
     this._max = new Observer(new Decimal(HUMANS.base_max));
     this._current = new Rater(new Decimal(HUMANS.default));
     this._assigned = new Observer(Decimal.dZero);
-  }
-
-  public assign_resource(resource: Resource, n: DecimalSource = 1) {
-    const n_d = new Decimal(n);
-    if (n_d.eq(Decimal.dZero)) return;
-    if (n_d.lessThan(0)) {
-      this.unassign_resources(resource, n_d.abs());
-      return;
-    }
-    const assign = this.add_assigned(n_d);
-    const resource_assigned = resource.assigned_humans;
-    resource_assigned.value = resource_assigned.value.plus(assign);
-  }
-
-  private unassign_resources(resource: Resource, n: Decimal) {
-    const max_unassign = resource.assigned_humans.value.min(n);
-    this.sub_assigned(max_unassign);
-    const assigned_humans = resource.assigned_humans;
-    assigned_humans.value = assigned_humans.value.minus(max_unassign);
   }
 
   // #endregion Constructors (1)
@@ -73,7 +55,31 @@ export class Humans {
 
   // #endregion Protected Getters And Setters (2)
 
-  // #region Protected Methods (1)
+  // #region Public Static Methods (1)
+
+  public static can_assign(r: ResourceNames) {
+    return r in HUMANS.collection;
+  }
+
+  // #endregion Public Static Methods (1)
+
+  // #region Public Methods (1)
+
+  public assign_resource(resource: Resource, n: DecimalSource = 1) {
+    const n_d = new Decimal(n);
+    if (n_d.eq(Decimal.dZero)) return;
+    if (n_d.lessThan(0)) {
+      this.unassign_resources(resource, n_d.abs());
+      return;
+    }
+    const assign = this.add_assigned(n_d);
+    const resource_assigned = resource.assigned_humans;
+    resource_assigned.value = resource_assigned.value.plus(assign);
+  }
+
+  // #endregion Public Methods (1)
+
+  // #region Private Methods (3)
 
   /**
    *
@@ -91,5 +97,12 @@ export class Humans {
     this.assigned = this.assigned.value.minus(n);
   }
 
-  // #endregion Protected Methods (1)
+  private unassign_resources(resource: Resource, n: Decimal) {
+    const max_unassign = resource.assigned_humans.value.min(n);
+    this.sub_assigned(max_unassign);
+    const assigned_humans = resource.assigned_humans;
+    assigned_humans.value = assigned_humans.value.minus(max_unassign);
+  }
+
+  // #endregion Private Methods (3)
 }

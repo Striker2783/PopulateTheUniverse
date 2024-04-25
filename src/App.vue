@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import StageOnePage from "./components/StageOnePage.vue";
-import Statistics from "./components/Statistics.vue";
+import StageOnePage from "./pages/StageOnePage.vue";
+import Statistics from "./pages/Statistics.vue";
 
 enum Pages {
   Main,

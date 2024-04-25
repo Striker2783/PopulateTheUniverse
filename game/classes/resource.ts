@@ -1,17 +1,19 @@
 import { Observer, Rater } from "game/utils/values";
 import type { ResourceData, ResourceNames } from "../data/resources";
 import Decimal, { type DecimalSource } from "break_eternity.js";
+import { HUMANS } from "game/data/human";
 
 export class Resource extends Rater {
-  // #region Properties (3)
+  // #region Properties (4)
 
   private readonly data;
 
   private _assigned_humans;
+  private _progress = 0;
 
   public readonly name;
 
-  // #endregion Properties (3)
+  // #endregion Properties (4)
 
   // #region Constructors (1)
 
@@ -24,7 +26,7 @@ export class Resource extends Rater {
 
   // #endregion Constructors (1)
 
-  // #region Public Getters And Setters (3)
+  // #region Public Getters And Setters (5)
 
   public get assigned_humans(): Observer<Decimal> {
     return this._assigned_humans;
@@ -38,5 +40,13 @@ export class Resource extends Rater {
     return this.data.cost || {};
   }
 
-  // #endregion Public Getters And Setters (3)
+  public get progress() {
+    return this._progress;
+  }
+
+  public set progress(value) {
+    this._progress = value;
+  }
+
+  // #endregion Public Getters And Setters (5)
 }
