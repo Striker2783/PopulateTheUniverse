@@ -7,32 +7,14 @@ export type ResourceCost = {
 export type ResourceData = {
   cost?: ResourceCost;
   default_value?: DecimalSource;
-  increment?: {
-    v?: DecimalSource;
-    can?: boolean;
-  };
 };
 
-export type ResourceNames =
-  | "wood"
-  | "stone"
-  | "food"
-  | "human"
-  | "wooden spear";
+export type ResourceNames = "wood" | "stone" | "food";
 
 export const Resources: { [key in ResourceNames]: ResourceData } = {
   wood: {},
   stone: {},
-  food: {},
-  human: {
-    cost: {
-      food: 10,
-    },
-  },
-  "wooden spear": {
-    cost: {
-      wood: 10,
-      stone: 10,
-    },
+  food: {
+    default_value: 100,
   },
 };
