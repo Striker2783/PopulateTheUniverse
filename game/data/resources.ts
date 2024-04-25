@@ -7,10 +7,6 @@ export type ResourceCost = {
 export type ResourceData = {
   cost?: ResourceCost;
   default_value?: DecimalSource;
-  increment?: {
-    v?: DecimalSource;
-    can?: boolean;
-  };
 };
 
 export type ResourceNames =
