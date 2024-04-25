@@ -20,6 +20,25 @@ export class Humans {
     this._assigned = new Observer(Decimal.dZero);
   }
 
+  public assign_resource(resource: Resource, n: DecimalSource = 1) {
+    const n_d = new Decimal(n);
+    if (n_d.eq(Decimal.dZero)) return;
+    if (n_d.lessThan(0)) {
+      this.unassign_resources(resource, n_d.abs());
+      return;
+    }
+    const assign = this.add_assigned(n_d);
+    const resource_assigned = resource.assigned_humans;
+    resource_assigned.value = resource_assigned.value.plus(assign);
+  }
+
+  private unassign_resources(resource: Resource, n: Decimal) {
+    const max_unassign = resource.assigned_humans.value.min(n);
+    this.sub_assigned(max_unassign);
+    const assigned_humans = resource.assigned_humans;
+    assigned_humans.value = assigned_humans.value.minus(max_unassign);
+  }
+
   // #endregion Constructors (1)
 
   // #region Public Getters And Setters (4)
@@ -61,11 +80,15 @@ export class Humans {
    * @param n Max
    * @returns Humans actually assigned
    */
-  protected add_assigned(n: DecimalSource = 1) {
+  private add_assigned(n: Decimal) {
     if (new Decimal(n).lessThan(1)) throw new Error();
     const max_assign = this.current.value.minus(this.assigned.value).min(n);
     this.assigned = this.assigned.value.plus(max_assign);
     return max_assign;
+  }
+
+  private sub_assigned(n: Decimal) {
+    this.assigned = this.assigned.value.minus(n);
   }
 
   // #endregion Protected Methods (1)

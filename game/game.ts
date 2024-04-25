@@ -53,6 +53,7 @@ export class Game {
 
   public add_humans(resource_name: ResourceNames, amount: DecimalSource = 1) {
     const resource = this.resources.get(resource_name)!;
+    this.humans.assign_resource(resource, amount);
   }
 
   // #endregion Public Methods (1)

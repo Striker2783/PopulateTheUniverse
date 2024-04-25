@@ -5,6 +5,14 @@ import game from "game/game";
 <template>
   <h1>Food: {{ game.resources.get("food")!.ref.value.floor() }}</h1>
   <div>Rate {{ game.resources.get("food")!.rate.ref.value.toFixed(2) }}/s</div>
+  <div>
+    Assigned:
+    {{ game.resources.get("food")!.assigned_humans.ref.value.floor() }}
+  </div>
+  <div>
+    <button @click="game.add_humans('food')">Assign</button>
+    <button @click="game.add_humans('food', -1)">Unassign</button>
+  </div>
   <h1>
     Humans: {{ game.humans.current.ref.value.floor() }} /
     {{ game.humans.max_humans.ref.value.floor() }}
