@@ -1,11 +1,13 @@
 import Decimal, { type DecimalSource } from "break_eternity.js";
 import { Resources, type ResourceNames } from "./data/resources";
 import { Resource } from "./classes/resource";
+import { Humans } from "./classes/humans";
 
 export class Game {
   // #region Properties (2)
 
-  private readonly _resources: Map<ResourceNames, Resource>;
+  private readonly _humans: Humans;
+  private readonly _resources: Map<ResourceNames, Resource> = new Map();
 
   // #endregion Properties (2)
 
@@ -13,6 +15,7 @@ export class Game {
 
   public constructor() {
     this._resources = new Map();
+    this._humans = new Humans();
     for (const [key, resource] of Object.entries(Resources)) {
       this._resources.set(
         key as ResourceNames,
@@ -34,13 +37,17 @@ export class Game {
 
   // #endregion Constructors (1)
 
-  // #region Public Getters And Setters (1)
+  // #region Public Getters And Setters (2)
+
+  public get humans(): Humans {
+    return this._humans;
+  }
 
   public get resources() {
     return this._resources;
   }
 
-  // #endregion Public Getters And Setters (1)
+  // #endregion Public Getters And Setters (2)
 
   // #region Public Methods (1)
 
@@ -50,7 +57,12 @@ export class Game {
 
   // #endregion Public Methods (1)
 
-  // #region Private Methods (2)
+  // #region Private Methods (4)
+
+  private buy_resource(resource: Resource, amount: DecimalSource = 1) {
+    if (!this.can_afford(amount, resource)) return;
+    this.no_check_buy_resource(resource, amount);
+  }
 
   private can_afford(amount: DecimalSource, resource: Resource) {
     const cost = resource.cost;
@@ -74,18 +86,13 @@ export class Game {
     resource.value = resource.value.add(amount);
   }
 
-  private buy_resource(resource: Resource, amount: DecimalSource = 1) {
-    if (!this.can_afford(amount, resource)) return;
-    this.no_check_buy_resource(resource, amount);
-  }
-
   private tick() {
     this._resources.forEach((field) => {
       field.tick();
     });
   }
 
-  // #endregion Private Methods (2)
+  // #endregion Private Methods (4)
 }
 
 export default new Game();
