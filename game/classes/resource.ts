@@ -9,7 +9,7 @@ export class Resource extends Rater {
   private readonly data;
 
   private _assigned_humans;
-  private _progress = 0;
+  private _progress = Decimal.dZero;
 
   public readonly name;
 
@@ -49,4 +49,22 @@ export class Resource extends Rater {
   }
 
   // #endregion Public Getters And Setters (5)
+
+  // #region Public Methods (2)
+
+  public add_progress(prog: Decimal) {
+    this.progress = this.progress.plus(prog);
+  }
+
+  public add_resource(max: DecimalSource) {
+    if (this.progress.lessThan(1)) return;
+    this.value = this.value.plus(this.progress.floor().min(max));
+    this.progress = this.progress.mod(1);
+  }
+
+  public reset_progress() {
+    this.progress = Decimal.dZero;
+  }
+
+  // #endregion Public Methods (2)
 }

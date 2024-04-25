@@ -29,8 +29,13 @@ export class Game {
     setInterval(() => {
       const dt = (Date.now() - last_update) / 1000;
       last_update = Date.now();
-      this.resources.forEach((element) => {
-        // element.value = element.value.plus(element.base_automate.mul(dt));
+      this.resources.forEach((resource) => {
+        if (!this.can_afford(resource)) {
+          resource.reset_progress();
+          return;
+        }
+        resource.add_progress(resource.assigned_humans.value.mul(dt));
+        this.no_check_buy_resource(resource, 1);
       });
     }, 50);
   }
@@ -60,12 +65,7 @@ export class Game {
 
   // #region Private Methods (4)
 
-  private buy_resource(resource: Resource, amount: DecimalSource = 1) {
-    if (!this.can_afford(amount, resource)) return;
-    this.no_check_buy_resource(resource, amount);
-  }
-
-  private can_afford(amount: DecimalSource, resource: Resource) {
+  private can_afford(resource: Resource, amount: DecimalSource = 1) {
     const cost = resource.cost;
     for (const [key, value] of Object.entries(cost)) {
       const resource = this.resources.get(key as ResourceNames)!;
@@ -84,7 +84,7 @@ export class Game {
         new Decimal(value).times(amount)
       );
     }
-    resource.value = resource.value.add(amount);
+    resource.add_resource(amount);
   }
 
   private tick() {
