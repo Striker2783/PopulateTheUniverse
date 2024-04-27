@@ -9873,11 +9873,14 @@ class Observeable {
     __publicField(this, "_v");
     this._v = ref(v);
   }
-  get v() {
+  get r() {
     return this._v;
   }
   set v(v) {
     this._v.value = v;
+  }
+  get v() {
+    return this._v.value;
   }
 }
 class Totaler extends Observeable {
@@ -9886,15 +9889,21 @@ class Totaler extends Observeable {
     __publicField(this, "_t");
     this._t = ref(v);
   }
+  static get Zero() {
+    return new Totaler(Decimal.dZero);
+  }
   get t() {
     return this._t;
   }
+  get r() {
+    return super.r;
+  }
   get v() {
-    return this._v;
+    return super.v;
   }
   set v(v) {
     super.v = v;
-    const diff = v.minus(super.v.value);
+    const diff = v.minus(super.r.value);
     if (diff.greaterThan(0))
       this.t = this.t.value.add(v);
   }
@@ -9904,17 +9913,14 @@ class Totaler extends Observeable {
 }
 class Human {
   constructor() {
-    __publicField(this, "_humans", new Totaler(Decimal.dZero));
+    __publicField(this, "_humans", Totaler.Zero);
     __publicField(this, "max", new Observeable(Decimal.dTen.pow(1e3)));
   }
   get humans() {
     return this._humans;
   }
-  get human_count() {
-    return this.humans.v.value;
-  }
   set humans(v) {
-    if (v.greaterThan(this.max.v.value))
+    if (v.greaterThan(this.max.v))
       return;
     this.humans.v = v;
   }
@@ -9922,37 +9928,35 @@ class Human {
 class Game {
   constructor() {
     __publicField(this, "humans", new Human());
+    __publicField(this, "research", Totaler.Zero);
     __publicField(this, "last_update", Date.now());
     setInterval(() => {
       const dt = (Date.now() - this.last_update) / 1e3;
       this.last_update = Date.now();
-      this.humans.humans = this.humans.humans.v.value.add(
-        this.human_base.mul(dt)
-      );
+      this.humans.humans = this.humans.humans.v.add(this.human_rate.mul(dt));
+      this.research.v = this.research.v.add(this.research_rate.mul(dt));
     });
   }
-  get human_base() {
-    return Decimal.dOne.plus(this.humans.human_count.div(100));
-  }
   get human_rate() {
-    return this.human_base;
+    return Decimal.dOne.plus(this.humans.humans.v.div(100));
+  }
+  get research_rate() {
+    return this.humans.humans.v.div(100);
   }
 }
 const game = new Game();
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "App",
   setup(__props) {
-    const rate = ref(game.human_rate);
-    requestAnimationFrame(() => {
-      rate.value = game.human_rate;
-    });
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(Fragment, null, [
-        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).humans.humans.v.value.toFixed(2)) + " / " + toDisplayString(unref(game).humans.max.v.value.floor()), 1),
-        createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).human_rate.toFixed(2)) + "/s", 1)
+        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).humans.humans.r.value.toFixed(2)) + " / " + toDisplayString(unref(game).humans.max.r.value.floor()), 1),
+        createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).human_rate.toFixed(2)) + "/s", 1),
+        createBaseVNode("h1", null, "Research: " + toDisplayString(unref(game).research.r.value.toFixed(2)), 1),
+        createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).research_rate.toFixed(2)) + "/s", 1)
       ], 64);
     };
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-5lC6UP2x.js.map
+//# sourceMappingURL=index-ByFCMXPv.js.map
