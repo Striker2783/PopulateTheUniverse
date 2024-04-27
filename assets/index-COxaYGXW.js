@@ -2168,6 +2168,38 @@ const onRenderTracked = createHook(
 function onErrorCaptured(hook, target = currentInstance) {
   injectHook("ec", hook, target);
 }
+function renderList(source, renderItem, cache, index) {
+  let ret;
+  const cached = cache;
+  if (isArray(source) || isString(source)) {
+    ret = new Array(source.length);
+    for (let i = 0, l = source.length; i < l; i++) {
+      ret[i] = renderItem(source[i], i, void 0, cached);
+    }
+  } else if (typeof source === "number") {
+    ret = new Array(source);
+    for (let i = 0; i < source; i++) {
+      ret[i] = renderItem(i + 1, i, void 0, cached);
+    }
+  } else if (isObject(source)) {
+    if (source[Symbol.iterator]) {
+      ret = Array.from(
+        source,
+        (item, i) => renderItem(item, i, void 0, cached)
+      );
+    } else {
+      const keys = Object.keys(source);
+      ret = new Array(keys.length);
+      for (let i = 0, l = keys.length; i < l; i++) {
+        const key = keys[i];
+        ret[i] = renderItem(source[key], key, i, cached);
+      }
+    }
+  } else {
+    ret = [];
+  }
+  return ret;
+}
 const getPublicInstance = (i) => {
   if (!i)
     return null;
@@ -9914,49 +9946,184 @@ class Totaler extends Observeable {
 class Human {
   constructor() {
     __publicField(this, "_humans", Totaler.Zero);
-    __publicField(this, "max", new Observeable(Decimal.dTen.pow(1e3)));
+    __publicField(this, "_max", new Observeable(Decimal.dTen.pow(2)));
+  }
+  get max() {
+    return this._max;
+  }
+  set max(v) {
+    this.max.v = v;
+    this.humans = this.humans.v.min(this.max.v);
   }
   get humans() {
     return this._humans;
   }
   set humans(v) {
-    if (v.greaterThan(this.max.v))
-      return;
-    this.humans.v = v;
+    this.humans.v = v.min(this.max.v);
   }
 }
+class Research {
+  constructor(cost, name, description, effect) {
+    this.cost = cost;
+    this.name = name;
+    this.description = description;
+    this.effect = effect;
+  }
+  uppercase(s) {
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  get cost_display() {
+    let c = "";
+    for (const [k, v] of Object.entries(this.cost)) {
+      c += this.uppercase(k) + ": " + v;
+    }
+    return c.trimEnd();
+  }
+}
+const Researchs = [
+  new Research(
+    { research: 100 },
+    "Communication",
+    "Humans Communicating!!! Wow!!!",
+    (v, g) => {
+      return {
+        max_humans: v.mul(2),
+        research: v.mul(1.5)
+      };
+    }
+  ),
+  new Research({ research: 200 }, "Fire", "Lightning Goes BURRRR!", (v, g) => {
+    return {
+      max_humans: v.mul(3),
+      humans: v.mul(1.5)
+    };
+  }),
+  new Research({ research: 1e3 }, "Crude Hut", "Weak Housing", (v, g) => {
+    return {
+      max_humans: v.mul(5),
+      humans: v.mul(1.5)
+    };
+  }),
+  new Research(
+    { research: 1e4 },
+    "Basic Agriculture",
+    "Farming but everyone is an idiot",
+    (v, g) => {
+      return {
+        max_humans: v.mul(1.5),
+        humans: v.mul(1.2),
+        research: v.mul(1.3)
+      };
+    }
+  )
+];
 class Game {
   constructor() {
     __publicField(this, "humans", new Human());
-    __publicField(this, "research", Totaler.Zero);
+    __publicField(this, "research_points", Totaler.Zero);
+    __publicField(this, "researched", []);
+    __publicField(this, "mapped", {
+      humans: () => this.humans.humans,
+      research: () => this.research_points
+    });
     __publicField(this, "last_update", Date.now());
     setInterval(() => {
-      const dt = (Date.now() - this.last_update) / 1e3;
+      const dt = (Date.now() - this.last_update) / 1e3 * 100;
       this.last_update = Date.now();
       this.humans.humans = this.humans.humans.v.add(this.human_rate.mul(dt));
-      this.research.v = this.research.v.add(this.research_rate.mul(dt));
+      this.research_points.v = this.research_points.v.add(
+        this.research_rate.mul(dt)
+      );
+      this.humans.max.v = this.human_max;
     });
   }
+  get human_max() {
+    let total = Decimal.dTen.pow(2);
+    total = this.calculate_research_effects(total, "max_humans");
+    return total;
+  }
+  calculate_research_effects(total, n) {
+    for (let index = 0; index < this.researched.length; index++) {
+      const researched = this.researched[index];
+      if (!researched)
+        continue;
+      const research = Researchs[index];
+      total = research.effect(total, game)[n] || total;
+    }
+    return total;
+  }
   get human_rate() {
-    return Decimal.dOne.plus(this.humans.humans.v.div(100));
+    let total = Decimal.dOne.plus(this.humans.humans.v.div(100));
+    total = this.calculate_research_effects(total, "humans");
+    return total;
   }
   get research_rate() {
-    return this.humans.humans.v.div(100);
+    let total = this.humans.humans.v.div(100);
+    total = this.calculate_research_effects(total, "research");
+    return total;
+  }
+  can_afford(research) {
+    for (const [k, v] of Object.entries(research.cost)) {
+      if (this.mapped[k]().v.lessThan(v))
+        return false;
+    }
+    return true;
+  }
+  no_check_buy(research) {
+    for (const [k, v] of Object.entries(research.cost)) {
+      const current = this.mapped[k]();
+      current.v = current.v.minus(v);
+    }
+  }
+  research(i) {
+    if (this.researched[i])
+      return;
+    const research = Researchs[i];
+    if (research === void 0)
+      return;
+    if (!this.can_afford(research))
+      return;
+    this.no_check_buy(research);
+    this.researched[i] = true;
   }
 }
 const game = new Game();
+const _hoisted_1 = ["onClick"];
+const _hoisted_2 = { style: { "font-size": "1.2em" } };
+const _hoisted_3 = { key: 0 };
+const _hoisted_4 = /* @__PURE__ */ createBaseVNode("p", null, "Bought", -1);
+const _hoisted_5 = [
+  _hoisted_4
+];
+const _hoisted_6 = { key: 1 };
+const _hoisted_7 = /* @__PURE__ */ createBaseVNode("p", null, "Cost:", -1);
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "App",
   setup(__props) {
+    const ResearchStuff = ref(Researchs);
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(Fragment, null, [
         createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).humans.humans.r.value.toFixed(2)) + " / " + toDisplayString(unref(game).humans.max.r.value.floor()), 1),
         createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).human_rate.toFixed(2)) + "/s", 1),
-        createBaseVNode("h1", null, "Research: " + toDisplayString(unref(game).research.r.value.toFixed(2)), 1),
-        createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).research_rate.toFixed(2)) + "/s", 1)
+        createBaseVNode("h1", null, "Research: " + toDisplayString(unref(game).research_points.r.value.toFixed(2)), 1),
+        createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).research_rate.toFixed(2)) + "/s", 1),
+        (openBlock(true), createElementBlock(Fragment, null, renderList(ResearchStuff.value, (upgrade, k) => {
+          return openBlock(), createElementBlock("ul", null, [
+            createBaseVNode("button", {
+              onClick: ($event) => unref(game).research(k)
+            }, [
+              createBaseVNode("p", _hoisted_2, toDisplayString(upgrade.name), 1),
+              createBaseVNode("p", null, toDisplayString(upgrade.description), 1),
+              unref(game).researched[k] ? (openBlock(), createElementBlock("div", _hoisted_3, _hoisted_5)) : (openBlock(), createElementBlock("div", _hoisted_6, [
+                _hoisted_7,
+                createBaseVNode("p", null, toDisplayString(upgrade.cost_display), 1)
+              ]))
+            ], 8, _hoisted_1)
+          ]);
+        }), 256))
       ], 64);
     };
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-ByFCMXPv.js.map
+//# sourceMappingURL=index-COxaYGXW.js.map
