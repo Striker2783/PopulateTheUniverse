@@ -4,14 +4,22 @@ import { Observeable, Totaler } from "./utils";
 export class Human {
   private readonly _humans = Totaler.Zero;
 
-  public readonly max = new Observeable(Decimal.dTen.pow(1000));
+  private readonly _max = new Observeable(Decimal.dTen.pow(2));
+
+  public get max(): Observeable<Decimal> {
+    return this._max;
+  }
+
+  public set max(v: Decimal) {
+    this.max.v = v;
+    this.humans = this.humans.v.min(this.max.v);
+  }
 
   public get humans(): Totaler {
     return this._humans;
   }
 
   public set humans(v: Decimal) {
-    if (v.greaterThan(this.max.v)) return;
-    this.humans.v = v;
+    this.humans.v = v.min(this.max.v);
   }
 }
