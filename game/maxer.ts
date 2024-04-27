@@ -22,4 +22,8 @@ export class Maxer {
   public set v(v: Decimal) {
     this.v.v = v.min(this.m.v);
   }
+
+  public get left() {
+    return this.m.v.minus(this.v.v);
+  }
 }
