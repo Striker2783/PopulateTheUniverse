@@ -1,25 +1,25 @@
 import Decimal from "break_eternity.js";
 import { Observeable, Totaler } from "./utils";
 
-export class Human {
-  private readonly _humans = Totaler.Zero;
+export class Maxer {
+  private readonly _value = Totaler.Zero;
 
   private readonly _max = new Observeable(Decimal.dTen.pow(2));
 
-  public get max(): Observeable<Decimal> {
+  public get m(): Observeable<Decimal> {
     return this._max;
   }
 
-  public set max(v: Decimal) {
-    this.max.v = v;
-    this.humans = this.humans.v.min(this.max.v);
+  public set m(v: Decimal) {
+    this.m.v = v;
+    this.v = this.v.v.min(this.m.v);
   }
 
-  public get humans(): Totaler {
-    return this._humans;
+  public get v(): Totaler {
+    return this._value;
   }
 
-  public set humans(v: Decimal) {
-    this.humans.v = v.min(this.max.v);
+  public set v(v: Decimal) {
+    this.v.v = v.min(this.m.v);
   }
 }
