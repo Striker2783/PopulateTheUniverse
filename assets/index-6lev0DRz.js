@@ -10028,7 +10028,7 @@ class Game {
     });
     __publicField(this, "last_update", Date.now());
     setInterval(() => {
-      const dt = (Date.now() - this.last_update) / 1e3 * 100;
+      const dt = (Date.now() - this.last_update) / 1e3;
       this.last_update = Date.now();
       this.humans.humans = this.humans.humans.v.add(this.human_rate.mul(dt));
       this.research_points.v = this.research_points.v.add(
@@ -10126,4 +10126,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-COxaYGXW.js.map
+//# sourceMappingURL=index-6lev0DRz.js.map
