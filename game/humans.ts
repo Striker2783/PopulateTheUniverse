@@ -2,7 +2,7 @@ import Decimal from "break_eternity.js";
 import { Observeable, Totaler } from "./utils";
 
 export class Human {
-  private readonly _humans = new Totaler(Decimal.dZero);
+  private readonly _humans = Totaler.Zero;
 
   public readonly max = new Observeable(Decimal.dTen.pow(1000));
 
@@ -10,12 +10,8 @@ export class Human {
     return this._humans;
   }
 
-  public get human_count() {
-    return this.humans.v.value;
-  }
-
   public set humans(v: Decimal) {
-    if (v.greaterThan(this.max.v.value)) return;
+    if (v.greaterThan(this.max.v)) return;
     this.humans.v = v;
   }
 }
