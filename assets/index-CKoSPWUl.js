@@ -9987,11 +9987,13 @@ class Research {
     __publicField(this, "description");
     __publicField(this, "effect");
     __publicField(this, "unlock");
+    __publicField(this, "effect_priority");
     this.cost = data.cost;
     this.name = data.name;
     this.description = data.description;
     this.effect = data.effect;
     this.unlock = data.unlock;
+    this.effect_priority = data.effect_priority;
   }
   uppercase(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
@@ -10033,26 +10035,31 @@ const Researchs = [
     description: "Weak Housing",
     effect: (v, g) => {
       return {
-        max_humans: v.mul(5),
-        humans: v.mul(1.5)
+        max_humans: v.plus(g.crude_homes.v.mul(30)),
+        humans: v.plus(g.crude_homes.v)
       };
     },
-    unlock: "CrudeHouse"
+    unlock: "CrudeHouse",
+    effect_priority: -1
   }),
   new Research({
-    cost: { research: 1e4 },
+    cost: { research: 2500 },
     name: "Basic Agriculture",
     description: "Farming but everyone is an idiot",
     effect: (v, g) => {
       return {
-        max_humans: v.mul(1.5),
-        humans: v.mul(1.2),
-        research: v.mul(1.3)
+        max_humans: v.plus(300).plus(Decimal.dTen.mul(g.farms.v)),
+        humans: v.plus(10),
+        research: v.plus(5)
       };
     },
-    unlock: "BasicAgriculture"
+    unlock: "BasicAgriculture",
+    effect_priority: -1
   })
 ];
+const sort_research_effects = (a, b) => {
+  return (Researchs[a].effect_priority || 0) - (Researchs[b].effect_priority || 0);
+};
 class Game {
   constructor() {
     __publicField(this, "humans", new Maxer());
@@ -10061,8 +10068,9 @@ class Game {
     __publicField(this, "farms", Totaler.Zero);
     __publicField(this, "research_points", Totaler.Zero);
     __publicField(this, "researched", []);
+    __publicField(this, "researched_in_order", []);
     __publicField(this, "unlocks", {});
-    __publicField(this, "effect_mapped", {
+    __publicField(this, "cost_mapped", {
       humans: () => this.humans.v,
       research: () => this.research_points
     });
@@ -10100,7 +10108,6 @@ class Game {
   }
   get human_max() {
     let total = Decimal.dTen.mul(this.land.left);
-    total = total.plus(Decimal.dTen.mul(2).mul(this.crude_homes.v));
     total = total.plus(Decimal.dTen.mul(this.farms.v));
     total = this.calculate_research_effects(total, "max_humans");
     return total;
@@ -10111,11 +10118,11 @@ class Game {
     return total;
   }
   calculate_research_effects(total, n) {
-    for (let index = 0; index < this.researched.length; index++) {
-      const researched = this.researched[index];
+    for (const i of this.researched_in_order) {
+      const researched = this.researched[i];
       if (!researched)
         continue;
-      const research = Researchs[index];
+      const research = Researchs[i];
       total = research.effect(total, game)[n] || total;
     }
     return total;
@@ -10133,14 +10140,14 @@ class Game {
   }
   can_afford(research) {
     for (const [k, v] of Object.entries(research.cost)) {
-      if (this.effect_mapped[k]().v.lessThan(v))
+      if (this.cost_mapped[k]().v.lessThan(v))
         return false;
     }
     return true;
   }
   no_check_buy(research) {
     for (const [k, v] of Object.entries(research.cost)) {
-      const current = this.effect_mapped[k]();
+      const current = this.cost_mapped[k]();
       current.v = current.v.minus(v);
     }
   }
@@ -10156,6 +10163,8 @@ class Game {
     this.researched[i] = true;
     if (research.unlock)
       this.unlocks[research.unlock] = true;
+    this.researched_in_order.push(i);
+    this.researched_in_order.sort(sort_research_effects);
   }
 }
 const game = new Game();
@@ -10241,4 +10250,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-AR7_pDfc.js.map
+//# sourceMappingURL=index-CKoSPWUl.js.map
