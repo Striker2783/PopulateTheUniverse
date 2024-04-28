@@ -100,7 +100,7 @@ export class Game {
     return total;
   }
 
-  private can_afford(research: Research) {
+  public can_afford(research: Research) {
     for (const [k, v] of Object.entries(research.cost)) {
       if (this.effect_mapped[k as ResearchCosts]().v.lessThan(v)) return false;
     }
