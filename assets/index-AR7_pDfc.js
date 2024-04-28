@@ -10222,7 +10222,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
           (openBlock(true), createElementBlock(Fragment, null, renderList(ResearchStuff.value, (upgrade, k) => {
             return openBlock(), createElementBlock("li", null, [
               createBaseVNode("button", {
-                class: "upgrade-button",
+                class: normalizeClass(["upgrade-button", [unref(game).can_afford(unref(Researchs)[k]) ? "upgrade-button-can" : ""]]),
                 onClick: ($event) => unref(game).research(k),
                 disabled: unref(game).researched[k]
               }, [
@@ -10232,7 +10232,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                   _hoisted_15,
                   createBaseVNode("p", null, toDisplayString(upgrade.cost_display), 1)
                 ]))
-              ], 8, _hoisted_8)
+              ], 10, _hoisted_8)
             ]);
           }), 256))
         ])
@@ -10241,4 +10241,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-dVB_WiId.js.map
+//# sourceMappingURL=index-AR7_pDfc.js.map
