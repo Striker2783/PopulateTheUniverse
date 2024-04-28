@@ -7,8 +7,19 @@ const ResearchStuff = ref(Researchs)
 </script>
 
 <template>
-    <h1>Humans: {{ game.humans.humans.r.value.toFixed(2) }} / {{ game.humans.max.r.value.floor() }}</h1>
+    <h1>Humans: {{ game.humans.v.r.value.toFixed(2) }} / {{ game.humans.m.r.value.toFixed(2) }}</h1>
     <p>Rate: {{ game.human_rate.toFixed(2) }}/s</p>
+    <div v-if="game.unlocks.CrudeHouse">
+        <h1>Land: {{ game.land.left.toFixed(2) }} / {{ game.land.m.r.value.toFixed(2) }}</h1>
+        <h1>Crude Huts: {{ game.crude_homes.v.toFixed(2) }}</h1>
+        <button @click="game.build(1, 'crude_homes')">Build</button>
+        <button @click="game.build(-1, 'crude_homes')">Destroy</button>
+    </div>
+    <div v-if="game.unlocks.BasicAgriculture">
+        <h1>Farm: {{ game.farms.v.toFixed(2) }}</h1>
+        <button @click="game.build(1, 'farms')">Build</button>
+        <button @click="game.build(-1, 'farms')">Destroy</button>
+    </div>
     <h1>Research: {{ game.research_points.r.value.toFixed(2) }}</h1>
     <p>Rate: {{ game.research_rate.toFixed(2) }}/s</p>
     <ul v-for="(upgrade, k) in ResearchStuff">
