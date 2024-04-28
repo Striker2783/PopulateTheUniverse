@@ -4,6 +4,7 @@ import { Observeable, Totaler } from "./utils";
 import {
   Research,
   Researchs,
+  sort_research_effects,
   type ResearchCosts,
   type ResearchEffects,
   type Unlocks,
@@ -18,12 +19,12 @@ export class Game {
   public farms = Totaler.Zero;
   public research_points = Totaler.Zero;
   public researched: boolean[] = [];
+  private researched_in_order: number[] = [];
   public unlocks: { [P in Unlocks]?: boolean } = {};
-  private effect_mapped: { [P in ResearchCosts]: () => Observeable<Decimal> } =
-    {
-      humans: () => this.humans.v,
-      research: () => this.research_points,
-    };
+  private cost_mapped: { [P in ResearchCosts]: () => Observeable<Decimal> } = {
+    humans: () => this.humans.v,
+    research: () => this.research_points,
+  };
   private build_mapped: { [P in BuildNames]: () => Observeable<Decimal> } = {
     crude_homes: () => this.crude_homes,
     farms: () => this.farms,
@@ -65,7 +66,6 @@ export class Game {
 
   public get human_max() {
     let total = Decimal.dTen.mul(this.land.left);
-    total = total.plus(Decimal.dTen.mul(2).mul(this.crude_homes.v));
     total = total.plus(Decimal.dTen.mul(this.farms.v));
     total = this.calculate_research_effects(total, "max_humans");
     return total;
@@ -78,10 +78,10 @@ export class Game {
   }
 
   private calculate_research_effects(total: Decimal, n: ResearchEffects) {
-    for (let index = 0; index < this.researched.length; index++) {
-      const researched = this.researched[index];
+    for (const i of this.researched_in_order) {
+      const researched = this.researched[i];
       if (!researched) continue;
-      const research = Researchs[index];
+      const research = Researchs[i];
       total = research.effect(total, game)[n] || total;
     }
     return total;
@@ -102,14 +102,14 @@ export class Game {
 
   public can_afford(research: Research) {
     for (const [k, v] of Object.entries(research.cost)) {
-      if (this.effect_mapped[k as ResearchCosts]().v.lessThan(v)) return false;
+      if (this.cost_mapped[k as ResearchCosts]().v.lessThan(v)) return false;
     }
     return true;
   }
 
   private no_check_buy(research: Research) {
     for (const [k, v] of Object.entries(research.cost)) {
-      const current = this.effect_mapped[k as ResearchCosts]();
+      const current = this.cost_mapped[k as ResearchCosts]();
       current.v = current.v.minus(v);
     }
   }
@@ -122,6 +122,8 @@ export class Game {
     this.no_check_buy(research);
     this.researched[i] = true;
     if (research.unlock) this.unlocks[research.unlock] = true;
+    this.researched_in_order.push(i);
+    this.researched_in_order.sort(sort_research_effects);
   }
 }
 

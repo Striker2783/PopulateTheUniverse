@@ -1,4 +1,4 @@
-import type Decimal from "break_eternity.js";
+import Decimal from "break_eternity.js";
 import type { DecimalSource } from "break_eternity.js";
 import type { Game } from "./game";
 
@@ -15,6 +15,7 @@ interface ResearchData {
   readonly description: string;
   readonly effect: (v: Decimal, g: Game) => Effect;
   readonly unlock?: Unlocks;
+  readonly effect_priority?: number;
 }
 
 export class Research implements ResearchData {
@@ -23,6 +24,7 @@ export class Research implements ResearchData {
   public readonly description: string;
   public readonly effect: (v: Decimal, g: Game) => Effect;
   public readonly unlock?: Unlocks;
+  public readonly effect_priority?: number;
 
   public constructor(data: ResearchData) {
     this.cost = data.cost;
@@ -30,6 +32,7 @@ export class Research implements ResearchData {
     this.description = data.description;
     this.effect = data.effect;
     this.unlock = data.unlock;
+    this.effect_priority = data.effect_priority;
   }
   private uppercase(s: string) {
     return s.charAt(0).toUpperCase() + s.slice(1);
@@ -72,23 +75,31 @@ export const Researchs = [
     description: "Weak Housing",
     effect: (v, g) => {
       return {
-        max_humans: v.mul(5),
-        humans: v.mul(1.5),
+        max_humans: v.plus(g.crude_homes.v.mul(30)),
+        humans: v.plus(g.crude_homes.v),
       };
     },
     unlock: "CrudeHouse",
+    effect_priority: -1,
   }),
   new Research({
-    cost: { research: 1e4 },
+    cost: { research: 2500 },
     name: "Basic Agriculture",
     description: "Farming but everyone is an idiot",
     effect: (v, g) => {
       return {
-        max_humans: v.mul(1.5),
-        humans: v.mul(1.2),
-        research: v.mul(1.3),
+        max_humans: v.plus(300).plus(Decimal.dTen.mul(g.farms.v)),
+        humans: v.plus(10),
+        research: v.plus(5),
       };
     },
     unlock: "BasicAgriculture",
+    effect_priority: -1,
   }),
 ];
+
+export const sort_research_effects = (a: number, b: number): number => {
+  return (
+    (Researchs[a].effect_priority || 0) - (Researchs[b].effect_priority || 0)
+  );
+};
