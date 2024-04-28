@@ -9,16 +9,24 @@ import {
   type Unlocks,
 } from "./research";
 
+export type BuildNames = "farms" | "crude_homes";
+
 export class Game {
   public humans = new Maxer();
   public land = new Maxer();
   public crude_homes = Totaler.Zero;
+  public farms = Totaler.Zero;
   public research_points = Totaler.Zero;
   public researched: boolean[] = [];
   public unlocks: { [P in Unlocks]?: boolean } = {};
-  private mapped: { [P in ResearchCosts]: () => Observeable<Decimal> } = {
-    humans: () => this.humans.v,
-    research: () => this.research_points,
+  private effect_mapped: { [P in ResearchCosts]: () => Observeable<Decimal> } =
+    {
+      humans: () => this.humans.v,
+      research: () => this.research_points,
+    };
+  private build_mapped: { [P in BuildNames]: () => Observeable<Decimal> } = {
+    crude_homes: () => this.crude_homes,
+    farms: () => this.farms,
   };
 
   private last_update = Date.now();
@@ -27,21 +35,18 @@ export class Game {
     this.start_ticks();
   }
 
-  private remove_crude_home(v: DecimalSource) {
-    v = new Decimal(v).abs();
-    const max_remove = this.land.v.v.min(v);
-    this.land.v = this.land.v.v.minus(max_remove);
-    this.crude_homes.v = this.crude_homes.v.minus(max_remove);
-  }
-
-  public build_crude_home(v: DecimalSource) {
+  public build(v: DecimalSource, n: BuildNames) {
+    const building = this.build_mapped[n]();
     if (new Decimal(v).lessThan(0)) {
-      this.remove_crude_home(v);
-      return;
+      v = new Decimal(v).abs();
+      const max_remove = this.land.v.v.min(v);
+      this.land.v = this.land.v.v.minus(max_remove);
+      building.v = building.v.minus(max_remove);
+    } else {
+      const max_build = this.land.left.min(v);
+      this.land.v = this.land.v.v.add(max_build);
+      building.v = building.v.plus(max_build);
     }
-    const max_build = this.land.left.min(v);
-    this.land.v = this.land.v.v.add(max_build);
-    this.crude_homes.v = this.crude_homes.v.plus(max_build);
   }
 
   private start_ticks() {
@@ -61,6 +66,7 @@ export class Game {
   public get human_max() {
     let total = Decimal.dTen.mul(this.land.left);
     total = total.plus(Decimal.dTen.mul(2).mul(this.crude_homes.v));
+    total = total.plus(Decimal.dTen.mul(this.farms.v));
     total = this.calculate_research_effects(total, "max_humans");
     return total;
   }
@@ -83,6 +89,7 @@ export class Game {
 
   public get human_rate() {
     let total = Decimal.dOne.plus(this.humans.v.v.div(100));
+    total = total.mul(Decimal.dOne.plus(this.farms.v.div(3)));
     total = this.calculate_research_effects(total, "humans");
     return total;
   }
@@ -95,14 +102,14 @@ export class Game {
 
   private can_afford(research: Research) {
     for (const [k, v] of Object.entries(research.cost)) {
-      if (this.mapped[k as ResearchCosts]().v.lessThan(v)) return false;
+      if (this.effect_mapped[k as ResearchCosts]().v.lessThan(v)) return false;
     }
     return true;
   }
 
   private no_check_buy(research: Research) {
     for (const [k, v] of Object.entries(research.cost)) {
-      const current = this.mapped[k as ResearchCosts]();
+      const current = this.effect_mapped[k as ResearchCosts]();
       current.v = current.v.minus(v);
     }
   }
