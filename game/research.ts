@@ -75,8 +75,8 @@ export const Researchs = [
     description: "Weak Housing",
     effect: (v, g) => {
       return {
-        max_humans: v.plus(g.crude_homes.v.mul(30)),
-        humans: v.plus(g.crude_homes.v),
+        max_humans: v.plus(g.buildings.crude_homes.v.mul(30)),
+        humans: v.plus(g.buildings.crude_homes.v),
       };
     },
     unlock: "CrudeHouse",
@@ -88,8 +88,8 @@ export const Researchs = [
     description: "Farming but everyone is an idiot",
     effect: (v, g) => {
       return {
-        max_humans: v.plus(300).plus(Decimal.dTen.mul(g.farms.v)),
-        humans: v.plus(10),
+        max_humans: v.plus(300).plus(Decimal.dTen.mul(g.buildings.farms.v)),
+        humans: v.plus(g.buildings.farms.v.mul(5)),
         research: v.plus(5),
       };
     },
@@ -102,7 +102,7 @@ export const Researchs = [
     description: "A facility to facilitate research",
     effect: (v, g) => {
       return {
-        research: v.plus(g.research_facility.v.mul(10)),
+        research: v.plus(g.buildings.research_facility.v.mul(10)),
       };
     },
     unlock: "ResearchFacility",

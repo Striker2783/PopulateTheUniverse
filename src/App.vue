@@ -22,17 +22,17 @@ const ResearchStuff = ref(Researchs)
             <p>Land: {{ game.land.left.toFixed(2) }} / {{ game.land.m.r.value.toFixed(2) }}</p>
         </li>
         <li v-if="game.unlocks.CrudeHouse">
-            <p>Crude Huts: {{ game.crude_homes.v.toFixed(2) }}</p>
+            <p>Crude Huts: {{ game.buildings.crude_homes.v.toFixed(2) }}</p>
             <button @click="game.build(1, 'crude_homes')">Build</button>
             <button @click="game.build(-1, 'crude_homes')">Destroy</button>
         </li>
         <li v-if="game.unlocks.BasicAgriculture">
-            <p>Farm: {{ game.farms.v.toFixed(2) }}</p>
+            <p>Farm: {{ game.buildings.farms.v.toFixed(2) }}</p>
             <button @click="game.build(1, 'farms')">Build</button>
             <button @click="game.build(-1, 'farms')">Destroy</button>
         </li>
         <li v-if="game.unlocks.ResearchFacility">
-            <p>Research Facility: {{ game.research_facility.v.toFixed(2) }}</p>
+            <p>Research Facility: {{ game.buildings.research_facility.v.toFixed(2) }}</p>
             <button @click="game.build(1, 'research_facility')">Build</button>
             <button @click="game.build(-1, 'research_facility')">Destroy</button>
         </li>
