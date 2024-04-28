@@ -34,7 +34,8 @@ const ResearchStuff = ref(Researchs)
     </ul>
     <ul class="upgrades">
         <li v-for="(upgrade, k) in ResearchStuff">
-            <button class="upgrade-button" @click="game.research(k)" :disabled="game.researched[k]">
+            <button class="upgrade-button" :class="[game.can_afford(Researchs[k]) ? 'upgrade-button-can' : '']"
+                @click="game.research(k)" :disabled="game.researched[k]">
                 <p class="upgrade-name">
                     {{ upgrade.name }}
                 </p>

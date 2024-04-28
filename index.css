@@ -48,6 +48,9 @@
   }
   background-color: rgb(235, 99, 99);
 }
+.upgrade-button-can {
+  background-color: yellow;
+}
 .upgrade-button[disabled] {
   background-color: rgb(76, 236, 76);
   color: black;
