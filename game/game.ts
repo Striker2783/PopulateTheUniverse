@@ -10,14 +10,16 @@ import {
   type Unlocks,
 } from "./research";
 
-export type BuildNames = "farms" | "crude_homes" | "research_facility";
+export type BuildNames = keyof typeof Game.prototype.buildings;
 
 export class Game {
   public humans = new Maxer();
   public land = new Maxer();
-  public crude_homes = Totaler.Zero;
-  public farms = Totaler.Zero;
-  public research_facility = Totaler.Zero;
+  public buildings = {
+    crude_homes: Totaler.Zero,
+    farms: Totaler.Zero,
+    research_facility: Totaler.Zero,
+  };
   public research_points = Totaler.Zero;
   public researched: boolean[] = [];
   private researched_in_order: number[] = [];
@@ -25,11 +27,6 @@ export class Game {
   private cost_mapped: { [P in ResearchCosts]: () => Observeable<Decimal> } = {
     humans: () => this.humans.v,
     research: () => this.research_points,
-  };
-  private build_mapped: { [P in BuildNames]: () => Observeable<Decimal> } = {
-    crude_homes: () => this.crude_homes,
-    farms: () => this.farms,
-    research_facility: () => this.research_facility,
   };
 
   private last_update = Date.now();
@@ -39,7 +36,7 @@ export class Game {
   }
 
   public build(v: DecimalSource, n: BuildNames) {
-    const building = this.build_mapped[n]();
+    const building = this.buildings[n];
     if (new Decimal(v).lessThan(0)) {
       v = new Decimal(v).abs();
       const max_remove = this.land.v.v.min(v).min(building.v);
@@ -68,7 +65,6 @@ export class Game {
 
   public get human_max() {
     let total = Decimal.dTen.mul(this.land.left);
-    total = total.plus(Decimal.dTen.mul(this.farms.v));
     total = this.calculate_research_effects(total, "max_humans");
     return total;
   }
@@ -91,7 +87,6 @@ export class Game {
 
   public get human_rate() {
     let total = Decimal.dOne.plus(this.humans.v.v.div(100));
-    total = total.mul(Decimal.dOne.plus(this.farms.v.div(3)));
     total = this.calculate_research_effects(total, "humans");
     return total;
   }
