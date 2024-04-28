@@ -10035,8 +10035,8 @@ const Researchs = [
     description: "Weak Housing",
     effect: (v, g) => {
       return {
-        max_humans: v.plus(g.crude_homes.v.mul(30)),
-        humans: v.plus(g.crude_homes.v)
+        max_humans: v.plus(g.buildings.crude_homes.v.mul(30)),
+        humans: v.plus(g.buildings.crude_homes.v)
       };
     },
     unlock: "CrudeHouse",
@@ -10048,8 +10048,8 @@ const Researchs = [
     description: "Farming but everyone is an idiot",
     effect: (v, g) => {
       return {
-        max_humans: v.plus(300).plus(Decimal.dTen.mul(g.farms.v)),
-        humans: v.plus(10),
+        max_humans: v.plus(300).plus(Decimal.dTen.mul(g.buildings.farms.v)),
+        humans: v.plus(g.buildings.farms.v.mul(5)),
         research: v.plus(5)
       };
     },
@@ -10062,7 +10062,7 @@ const Researchs = [
     description: "A facility to facilitate research",
     effect: (v, g) => {
       return {
-        research: v.plus(g.research_facility.v.mul(10))
+        research: v.plus(g.buildings.research_facility.v.mul(10))
       };
     },
     unlock: "ResearchFacility",
@@ -10076,9 +10076,11 @@ class Game {
   constructor() {
     __publicField(this, "humans", new Maxer());
     __publicField(this, "land", new Maxer());
-    __publicField(this, "crude_homes", Totaler.Zero);
-    __publicField(this, "farms", Totaler.Zero);
-    __publicField(this, "research_facility", Totaler.Zero);
+    __publicField(this, "buildings", {
+      crude_homes: Totaler.Zero,
+      farms: Totaler.Zero,
+      research_facility: Totaler.Zero
+    });
     __publicField(this, "research_points", Totaler.Zero);
     __publicField(this, "researched", []);
     __publicField(this, "researched_in_order", []);
@@ -10087,16 +10089,11 @@ class Game {
       humans: () => this.humans.v,
       research: () => this.research_points
     });
-    __publicField(this, "build_mapped", {
-      crude_homes: () => this.crude_homes,
-      farms: () => this.farms,
-      research_facility: () => this.research_facility
-    });
     __publicField(this, "last_update", Date.now());
     this.start_ticks();
   }
   build(v, n) {
-    const building = this.build_mapped[n]();
+    const building = this.buildings[n];
     if (new Decimal(v).lessThan(0)) {
       v = new Decimal(v).abs();
       const max_remove = this.land.v.v.min(v).min(building.v);
@@ -10122,7 +10119,6 @@ class Game {
   }
   get human_max() {
     let total = Decimal.dTen.mul(this.land.left);
-    total = total.plus(Decimal.dTen.mul(this.farms.v));
     total = this.calculate_research_effects(total, "max_humans");
     return total;
   }
@@ -10143,7 +10139,6 @@ class Game {
   }
   get human_rate() {
     let total = Decimal.dOne.plus(this.humans.v.v.div(100));
-    total = total.mul(Decimal.dOne.plus(this.farms.v.div(3)));
     total = this.calculate_research_effects(total, "humans");
     return total;
   }
@@ -10224,7 +10219,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             createBaseVNode("p", null, "Land: " + toDisplayString(unref(game).land.left.toFixed(2)) + " / " + toDisplayString(unref(game).land.m.r.value.toFixed(2)), 1)
           ]),
           unref(game).unlocks.CrudeHouse ? (openBlock(), createElementBlock("li", _hoisted_5, [
-            createBaseVNode("p", null, "Crude Huts: " + toDisplayString(unref(game).crude_homes.v.toFixed(2)), 1),
+            createBaseVNode("p", null, "Crude Huts: " + toDisplayString(unref(game).buildings.crude_homes.v.toFixed(2)), 1),
             createBaseVNode("button", {
               onClick: _cache[0] || (_cache[0] = ($event) => unref(game).build(1, "crude_homes"))
             }, "Build"),
@@ -10233,7 +10228,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, "Destroy")
           ])) : createCommentVNode("", true),
           unref(game).unlocks.BasicAgriculture ? (openBlock(), createElementBlock("li", _hoisted_6, [
-            createBaseVNode("p", null, "Farm: " + toDisplayString(unref(game).farms.v.toFixed(2)), 1),
+            createBaseVNode("p", null, "Farm: " + toDisplayString(unref(game).buildings.farms.v.toFixed(2)), 1),
             createBaseVNode("button", {
               onClick: _cache[2] || (_cache[2] = ($event) => unref(game).build(1, "farms"))
             }, "Build"),
@@ -10242,7 +10237,7 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             }, "Destroy")
           ])) : createCommentVNode("", true),
           unref(game).unlocks.ResearchFacility ? (openBlock(), createElementBlock("li", _hoisted_7, [
-            createBaseVNode("p", null, "Research Facility: " + toDisplayString(unref(game).research_facility.v.toFixed(2)), 1),
+            createBaseVNode("p", null, "Research Facility: " + toDisplayString(unref(game).buildings.research_facility.v.toFixed(2)), 1),
             createBaseVNode("button", {
               onClick: _cache[4] || (_cache[4] = ($event) => unref(game).build(1, "research_facility"))
             }, "Build"),
@@ -10274,4 +10269,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-DU6wiIhL.js.map
+//# sourceMappingURL=index-pROAcL6j.js.map
