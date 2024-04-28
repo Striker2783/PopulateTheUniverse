@@ -51,7 +51,7 @@ export class Game {
 
   private start_ticks() {
     setInterval(() => {
-      const dt = (Date.now() - this.last_update) / 1000;
+      const dt = ((Date.now() - this.last_update) / 1000) * 100;
       this.last_update = Date.now();
 
       this.humans.v = this.humans.v.v.add(this.human_rate.mul(dt));
