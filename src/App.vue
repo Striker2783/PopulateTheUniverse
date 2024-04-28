@@ -31,6 +31,11 @@ const ResearchStuff = ref(Researchs)
             <button @click="game.build(1, 'farms')">Build</button>
             <button @click="game.build(-1, 'farms')">Destroy</button>
         </li>
+        <li v-if="game.unlocks.ResearchFacility">
+            <p>Research Facility: {{ game.research_facility.v.toFixed(2) }}</p>
+            <button @click="game.build(1, 'research_facility')">Build</button>
+            <button @click="game.build(-1, 'research_facility')">Destroy</button>
+        </li>
     </ul>
     <ul class="upgrades">
         <li v-for="(upgrade, k) in ResearchStuff">

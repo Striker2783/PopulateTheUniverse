@@ -4,7 +4,7 @@ import type { Game } from "./game";
 
 export type ResearchEffects = "humans" | "research" | "max_humans" | "land";
 export type ResearchCosts = "humans" | "research";
-export type Unlocks = "CrudeHouse" | "BasicAgriculture";
+export type Unlocks = "CrudeHouse" | "BasicAgriculture" | "ResearchFacility";
 
 export type Effect = { [P in ResearchEffects]?: Decimal };
 export type Cost = { [P in ResearchCosts]?: DecimalSource };
@@ -94,6 +94,18 @@ export const Researchs = [
       };
     },
     unlock: "BasicAgriculture",
+    effect_priority: -1,
+  }),
+  new Research({
+    cost: { research: 50000 },
+    name: "Research Facility",
+    description: "A facility to facilitate research",
+    effect: (v, g) => {
+      return {
+        research: v.plus(g.research_facility.v.mul(10)),
+      };
+    },
+    unlock: "ResearchFacility",
     effect_priority: -1,
   }),
 ];

@@ -10,13 +10,14 @@ import {
   type Unlocks,
 } from "./research";
 
-export type BuildNames = "farms" | "crude_homes";
+export type BuildNames = "farms" | "crude_homes" | "research_facility";
 
 export class Game {
   public humans = new Maxer();
   public land = new Maxer();
   public crude_homes = Totaler.Zero;
   public farms = Totaler.Zero;
+  public research_facility = Totaler.Zero;
   public research_points = Totaler.Zero;
   public researched: boolean[] = [];
   private researched_in_order: number[] = [];
@@ -28,6 +29,7 @@ export class Game {
   private build_mapped: { [P in BuildNames]: () => Observeable<Decimal> } = {
     crude_homes: () => this.crude_homes,
     farms: () => this.farms,
+    research_facility: () => this.research_facility,
   };
 
   private last_update = Date.now();
