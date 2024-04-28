@@ -10088,7 +10088,7 @@ class Game {
   }
   start_ticks() {
     setInterval(() => {
-      const dt = (Date.now() - this.last_update) / 1e3 * 100;
+      const dt = (Date.now() - this.last_update) / 1e3;
       this.last_update = Date.now();
       this.humans.v = this.humans.v.v.add(this.human_rate.mul(dt));
       this.research_points.v = this.research_points.v.add(
@@ -10218,4 +10218,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-QOxD93BV.js.map
+//# sourceMappingURL=index-BT9L9kkL.js.map
