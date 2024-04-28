@@ -10088,7 +10088,7 @@ class Game {
   }
   start_ticks() {
     setInterval(() => {
-      const dt = (Date.now() - this.last_update) / 1e3;
+      const dt = (Date.now() - this.last_update) / 1e3 * 100;
       this.last_update = Date.now();
       this.humans.v = this.humans.v.v.add(this.human_rate.mul(dt));
       this.research_points.v = this.research_points.v.add(
@@ -10159,63 +10159,86 @@ class Game {
   }
 }
 const game = new Game();
-const _hoisted_1 = { key: 0 };
-const _hoisted_2 = { key: 1 };
-const _hoisted_3 = ["onClick"];
-const _hoisted_4 = { style: { "font-size": "1.2em" } };
+const _hoisted_1 = { class: "bar" };
+const _hoisted_2 = { class: "resource-item" };
+const _hoisted_3 = { class: "resource-item" };
+const _hoisted_4 = { class: "bar" };
 const _hoisted_5 = { key: 0 };
-const _hoisted_6 = /* @__PURE__ */ createBaseVNode("p", null, "Bought", -1);
-const _hoisted_7 = [
-  _hoisted_6
+const _hoisted_6 = { key: 1 };
+const _hoisted_7 = { class: "upgrades" };
+const _hoisted_8 = ["onClick", "disabled"];
+const _hoisted_9 = { class: "upgrade-name" };
+const _hoisted_10 = { class: "upgrade-description" };
+const _hoisted_11 = { key: 0 };
+const _hoisted_12 = /* @__PURE__ */ createBaseVNode("p", null, "Bought", -1);
+const _hoisted_13 = [
+  _hoisted_12
 ];
-const _hoisted_8 = { key: 1 };
-const _hoisted_9 = /* @__PURE__ */ createBaseVNode("p", null, "Cost:", -1);
+const _hoisted_14 = {
+  key: 1,
+  class: "upgrade-cost"
+};
+const _hoisted_15 = /* @__PURE__ */ createBaseVNode("p", null, "Cost:", -1);
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "App",
   setup(__props) {
     const ResearchStuff = ref(Researchs);
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(Fragment, null, [
-        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).humans.v.r.value.toFixed(2)) + " / " + toDisplayString(unref(game).humans.m.r.value.toFixed(2)), 1),
-        createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).human_rate.toFixed(2)) + "/s", 1),
-        unref(game).unlocks.CrudeHouse ? (openBlock(), createElementBlock("div", _hoisted_1, [
-          createBaseVNode("h1", null, "Land: " + toDisplayString(unref(game).land.left.toFixed(2)) + " / " + toDisplayString(unref(game).land.m.r.value.toFixed(2)), 1),
-          createBaseVNode("h1", null, "Crude Huts: " + toDisplayString(unref(game).crude_homes.v.toFixed(2)), 1),
-          createBaseVNode("button", {
-            onClick: _cache[0] || (_cache[0] = ($event) => unref(game).build(1, "crude_homes"))
-          }, "Build"),
-          createBaseVNode("button", {
-            onClick: _cache[1] || (_cache[1] = ($event) => unref(game).build(-1, "crude_homes"))
-          }, "Destroy")
-        ])) : createCommentVNode("", true),
-        unref(game).unlocks.BasicAgriculture ? (openBlock(), createElementBlock("div", _hoisted_2, [
-          createBaseVNode("h1", null, "Farm: " + toDisplayString(unref(game).farms.v.toFixed(2)), 1),
-          createBaseVNode("button", {
-            onClick: _cache[2] || (_cache[2] = ($event) => unref(game).build(1, "farms"))
-          }, "Build"),
-          createBaseVNode("button", {
-            onClick: _cache[3] || (_cache[3] = ($event) => unref(game).build(-1, "farms"))
-          }, "Destroy")
-        ])) : createCommentVNode("", true),
-        createBaseVNode("h1", null, "Research: " + toDisplayString(unref(game).research_points.r.value.toFixed(2)), 1),
-        createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).research_rate.toFixed(2)) + "/s", 1),
-        (openBlock(true), createElementBlock(Fragment, null, renderList(ResearchStuff.value, (upgrade, k) => {
-          return openBlock(), createElementBlock("ul", null, [
+        createBaseVNode("ul", _hoisted_1, [
+          createBaseVNode("li", _hoisted_2, [
+            createBaseVNode("p", null, "Humans: " + toDisplayString(unref(game).humans.v.r.value.toFixed(2)) + " / " + toDisplayString(unref(game).humans.m.r.value.toFixed(2)), 1),
+            createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).human_rate.toFixed(2)) + "/s", 1)
+          ]),
+          createBaseVNode("li", _hoisted_3, [
+            createBaseVNode("p", null, "Research: " + toDisplayString(unref(game).research_points.r.value.toFixed(2)), 1),
+            createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).research_rate.toFixed(2)) + "/s", 1)
+          ])
+        ]),
+        createBaseVNode("ul", _hoisted_4, [
+          createBaseVNode("li", null, [
+            createBaseVNode("p", null, "Land: " + toDisplayString(unref(game).land.left.toFixed(2)) + " / " + toDisplayString(unref(game).land.m.r.value.toFixed(2)), 1)
+          ]),
+          unref(game).unlocks.CrudeHouse ? (openBlock(), createElementBlock("li", _hoisted_5, [
+            createBaseVNode("p", null, "Crude Huts: " + toDisplayString(unref(game).crude_homes.v.toFixed(2)), 1),
             createBaseVNode("button", {
-              onClick: ($event) => unref(game).research(k)
-            }, [
-              createBaseVNode("p", _hoisted_4, toDisplayString(upgrade.name), 1),
-              createBaseVNode("p", null, toDisplayString(upgrade.description), 1),
-              unref(game).researched[k] ? (openBlock(), createElementBlock("div", _hoisted_5, _hoisted_7)) : (openBlock(), createElementBlock("div", _hoisted_8, [
-                _hoisted_9,
-                createBaseVNode("p", null, toDisplayString(upgrade.cost_display), 1)
-              ]))
-            ], 8, _hoisted_3)
-          ]);
-        }), 256))
+              onClick: _cache[0] || (_cache[0] = ($event) => unref(game).build(1, "crude_homes"))
+            }, "Build"),
+            createBaseVNode("button", {
+              onClick: _cache[1] || (_cache[1] = ($event) => unref(game).build(-1, "crude_homes"))
+            }, "Destroy")
+          ])) : createCommentVNode("", true),
+          unref(game).unlocks.BasicAgriculture ? (openBlock(), createElementBlock("li", _hoisted_6, [
+            createBaseVNode("p", null, "Farm: " + toDisplayString(unref(game).farms.v.toFixed(2)), 1),
+            createBaseVNode("button", {
+              onClick: _cache[2] || (_cache[2] = ($event) => unref(game).build(1, "farms"))
+            }, "Build"),
+            createBaseVNode("button", {
+              onClick: _cache[3] || (_cache[3] = ($event) => unref(game).build(-1, "farms"))
+            }, "Destroy")
+          ])) : createCommentVNode("", true)
+        ]),
+        createBaseVNode("ul", _hoisted_7, [
+          (openBlock(true), createElementBlock(Fragment, null, renderList(ResearchStuff.value, (upgrade, k) => {
+            return openBlock(), createElementBlock("li", null, [
+              createBaseVNode("button", {
+                class: "upgrade-button",
+                onClick: ($event) => unref(game).research(k),
+                disabled: unref(game).researched[k]
+              }, [
+                createBaseVNode("p", _hoisted_9, toDisplayString(upgrade.name), 1),
+                createBaseVNode("p", _hoisted_10, toDisplayString(upgrade.description), 1),
+                unref(game).researched[k] ? (openBlock(), createElementBlock("div", _hoisted_11, _hoisted_13)) : (openBlock(), createElementBlock("div", _hoisted_14, [
+                  _hoisted_15,
+                  createBaseVNode("p", null, toDisplayString(upgrade.cost_display), 1)
+                ]))
+              ], 8, _hoisted_8)
+            ]);
+          }), 256))
+        ])
       ], 64);
     };
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-BT9L9kkL.js.map
+//# sourceMappingURL=index-CvkwDpdi.js.map
