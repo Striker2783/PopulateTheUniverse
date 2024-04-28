@@ -10055,6 +10055,18 @@ const Researchs = [
     },
     unlock: "BasicAgriculture",
     effect_priority: -1
+  }),
+  new Research({
+    cost: { research: 5e4 },
+    name: "Research Facility",
+    description: "A facility to facilitate research",
+    effect: (v, g) => {
+      return {
+        research: v.plus(g.research_facility.v.mul(10))
+      };
+    },
+    unlock: "ResearchFacility",
+    effect_priority: -1
   })
 ];
 const sort_research_effects = (a, b) => {
@@ -10066,6 +10078,7 @@ class Game {
     __publicField(this, "land", new Maxer());
     __publicField(this, "crude_homes", Totaler.Zero);
     __publicField(this, "farms", Totaler.Zero);
+    __publicField(this, "research_facility", Totaler.Zero);
     __publicField(this, "research_points", Totaler.Zero);
     __publicField(this, "researched", []);
     __publicField(this, "researched_in_order", []);
@@ -10076,7 +10089,8 @@ class Game {
     });
     __publicField(this, "build_mapped", {
       crude_homes: () => this.crude_homes,
-      farms: () => this.farms
+      farms: () => this.farms,
+      research_facility: () => this.research_facility
     });
     __publicField(this, "last_update", Date.now());
     this.start_ticks();
@@ -10174,20 +10188,21 @@ const _hoisted_3 = { class: "resource-item" };
 const _hoisted_4 = { class: "bar" };
 const _hoisted_5 = { key: 0 };
 const _hoisted_6 = { key: 1 };
-const _hoisted_7 = { class: "upgrades" };
-const _hoisted_8 = ["onClick", "disabled"];
-const _hoisted_9 = { class: "upgrade-name" };
-const _hoisted_10 = { class: "upgrade-description" };
-const _hoisted_11 = { key: 0 };
-const _hoisted_12 = /* @__PURE__ */ createBaseVNode("p", null, "Bought", -1);
-const _hoisted_13 = [
-  _hoisted_12
+const _hoisted_7 = { key: 2 };
+const _hoisted_8 = { class: "upgrades" };
+const _hoisted_9 = ["onClick", "disabled"];
+const _hoisted_10 = { class: "upgrade-name" };
+const _hoisted_11 = { class: "upgrade-description" };
+const _hoisted_12 = { key: 0 };
+const _hoisted_13 = /* @__PURE__ */ createBaseVNode("p", null, "Bought", -1);
+const _hoisted_14 = [
+  _hoisted_13
 ];
-const _hoisted_14 = {
+const _hoisted_15 = {
   key: 1,
   class: "upgrade-cost"
 };
-const _hoisted_15 = /* @__PURE__ */ createBaseVNode("p", null, "Cost:", -1);
+const _hoisted_16 = /* @__PURE__ */ createBaseVNode("p", null, "Cost:", -1);
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "App",
   setup(__props) {
@@ -10225,9 +10240,18 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             createBaseVNode("button", {
               onClick: _cache[3] || (_cache[3] = ($event) => unref(game).build(-1, "farms"))
             }, "Destroy")
+          ])) : createCommentVNode("", true),
+          unref(game).unlocks.ResearchFacility ? (openBlock(), createElementBlock("li", _hoisted_7, [
+            createBaseVNode("p", null, "Research Facility: " + toDisplayString(unref(game).research_facility.v.toFixed(2)), 1),
+            createBaseVNode("button", {
+              onClick: _cache[4] || (_cache[4] = ($event) => unref(game).build(1, "research_facility"))
+            }, "Build"),
+            createBaseVNode("button", {
+              onClick: _cache[5] || (_cache[5] = ($event) => unref(game).build(-1, "research_facility"))
+            }, "Destroy")
           ])) : createCommentVNode("", true)
         ]),
-        createBaseVNode("ul", _hoisted_7, [
+        createBaseVNode("ul", _hoisted_8, [
           (openBlock(true), createElementBlock(Fragment, null, renderList(ResearchStuff.value, (upgrade, k) => {
             return openBlock(), createElementBlock("li", null, [
               createBaseVNode("button", {
@@ -10235,13 +10259,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
                 onClick: ($event) => unref(game).research(k),
                 disabled: unref(game).researched[k]
               }, [
-                createBaseVNode("p", _hoisted_9, toDisplayString(upgrade.name), 1),
-                createBaseVNode("p", _hoisted_10, toDisplayString(upgrade.description), 1),
-                unref(game).researched[k] ? (openBlock(), createElementBlock("div", _hoisted_11, _hoisted_13)) : (openBlock(), createElementBlock("div", _hoisted_14, [
-                  _hoisted_15,
+                createBaseVNode("p", _hoisted_10, toDisplayString(upgrade.name), 1),
+                createBaseVNode("p", _hoisted_11, toDisplayString(upgrade.description), 1),
+                unref(game).researched[k] ? (openBlock(), createElementBlock("div", _hoisted_12, _hoisted_14)) : (openBlock(), createElementBlock("div", _hoisted_15, [
+                  _hoisted_16,
                   createBaseVNode("p", null, toDisplayString(upgrade.cost_display), 1)
                 ]))
-              ], 10, _hoisted_8)
+              ], 10, _hoisted_9)
             ]);
           }), 256))
         ])
@@ -10250,4 +10274,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-CKoSPWUl.js.map
+//# sourceMappingURL=index-DU6wiIhL.js.map
