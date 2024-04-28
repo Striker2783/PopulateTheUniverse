@@ -4685,6 +4685,18 @@ function createElementBlock(type, props, children, patchFlag, dynamicProps, shap
     )
   );
 }
+function createBlock(type, props, children, patchFlag, dynamicProps) {
+  return setupBlock(
+    createVNode(
+      type,
+      props,
+      children,
+      patchFlag,
+      dynamicProps,
+      true
+    )
+  );
+}
 function isVNode(value) {
   return value ? value.__v_isVNode === true : false;
 }
@@ -4859,6 +4871,9 @@ function cloneVNode(vnode, extraProps, mergeRef = false) {
 }
 function createTextVNode(text = " ", flag = 0) {
   return createVNode(Text, null, text, flag);
+}
+function createCommentVNode(text = "", asBlock = false) {
+  return asBlock ? (openBlock(), createBlock(Comment, null, text)) : createVNode(Comment, null, text);
 }
 function normalizeVNode(child) {
   if (child == null || typeof child === "boolean") {
@@ -9943,31 +9958,40 @@ class Totaler extends Observeable {
     this._t.value = t;
   }
 }
-class Human {
+class Maxer {
   constructor() {
-    __publicField(this, "_humans", Totaler.Zero);
+    __publicField(this, "_value", Totaler.Zero);
     __publicField(this, "_max", new Observeable(Decimal.dTen.pow(2)));
   }
-  get max() {
+  get m() {
     return this._max;
   }
-  set max(v) {
-    this.max.v = v;
-    this.humans = this.humans.v.min(this.max.v);
+  set m(v) {
+    this.m.v = v;
+    this.v = this.v.v.min(this.m.v);
   }
-  get humans() {
-    return this._humans;
+  get v() {
+    return this._value;
   }
-  set humans(v) {
-    this.humans.v = v.min(this.max.v);
+  set v(v) {
+    this.v.v = v.min(this.m.v);
+  }
+  get left() {
+    return this.m.v.minus(this.v.v);
   }
 }
 class Research {
-  constructor(cost, name, description, effect) {
-    this.cost = cost;
-    this.name = name;
-    this.description = description;
-    this.effect = effect;
+  constructor(data) {
+    __publicField(this, "cost");
+    __publicField(this, "name");
+    __publicField(this, "description");
+    __publicField(this, "effect");
+    __publicField(this, "unlock");
+    this.cost = data.cost;
+    this.name = data.name;
+    this.description = data.description;
+    this.effect = data.effect;
+    this.unlock = data.unlock;
   }
   uppercase(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
@@ -9981,65 +10005,109 @@ class Research {
   }
 }
 const Researchs = [
-  new Research(
-    { research: 100 },
-    "Communication",
-    "Humans Communicating!!! Wow!!!",
-    (v, g) => {
+  new Research({
+    cost: { research: 100 },
+    name: "Communication",
+    description: "Humans Communicating!!! Wow!!!",
+    effect: (v, g) => {
       return {
         max_humans: v.mul(2),
         research: v.mul(1.5)
       };
     }
-  ),
-  new Research({ research: 200 }, "Fire", "Lightning Goes BURRRR!", (v, g) => {
-    return {
-      max_humans: v.mul(3),
-      humans: v.mul(1.5)
-    };
   }),
-  new Research({ research: 1e3 }, "Crude Hut", "Weak Housing", (v, g) => {
-    return {
-      max_humans: v.mul(5),
-      humans: v.mul(1.5)
-    };
+  new Research({
+    cost: { research: 200 },
+    name: "Fire",
+    description: "Lightning Goes BURRRR!",
+    effect: (v, g) => {
+      return {
+        max_humans: v.mul(3),
+        humans: v.mul(1.5)
+      };
+    }
   }),
-  new Research(
-    { research: 1e4 },
-    "Basic Agriculture",
-    "Farming but everyone is an idiot",
-    (v, g) => {
+  new Research({
+    cost: { research: 1e3 },
+    name: "Crude Hut",
+    description: "Weak Housing",
+    effect: (v, g) => {
+      return {
+        max_humans: v.mul(5),
+        humans: v.mul(1.5)
+      };
+    },
+    unlock: "CrudeHouse"
+  }),
+  new Research({
+    cost: { research: 1e4 },
+    name: "Basic Agriculture",
+    description: "Farming but everyone is an idiot",
+    effect: (v, g) => {
       return {
         max_humans: v.mul(1.5),
         humans: v.mul(1.2),
         research: v.mul(1.3)
       };
-    }
-  )
+    },
+    unlock: "BasicAgriculture"
+  })
 ];
 class Game {
   constructor() {
-    __publicField(this, "humans", new Human());
+    __publicField(this, "humans", new Maxer());
+    __publicField(this, "land", new Maxer());
+    __publicField(this, "crude_homes", Totaler.Zero);
+    __publicField(this, "farms", Totaler.Zero);
     __publicField(this, "research_points", Totaler.Zero);
     __publicField(this, "researched", []);
-    __publicField(this, "mapped", {
-      humans: () => this.humans.humans,
+    __publicField(this, "unlocks", {});
+    __publicField(this, "effect_mapped", {
+      humans: () => this.humans.v,
       research: () => this.research_points
     });
+    __publicField(this, "build_mapped", {
+      crude_homes: () => this.crude_homes,
+      farms: () => this.farms
+    });
     __publicField(this, "last_update", Date.now());
+    this.start_ticks();
+  }
+  build(v, n) {
+    const building = this.build_mapped[n]();
+    if (new Decimal(v).lessThan(0)) {
+      v = new Decimal(v).abs();
+      const max_remove = this.land.v.v.min(v);
+      this.land.v = this.land.v.v.minus(max_remove);
+      building.v = building.v.minus(max_remove);
+    } else {
+      const max_build = this.land.left.min(v);
+      this.land.v = this.land.v.v.add(max_build);
+      building.v = building.v.plus(max_build);
+    }
+  }
+  start_ticks() {
     setInterval(() => {
-      const dt = (Date.now() - this.last_update) / 1e3;
+      const dt = (Date.now() - this.last_update) / 1e3 * 100;
       this.last_update = Date.now();
-      this.humans.humans = this.humans.humans.v.add(this.human_rate.mul(dt));
+      this.humans.v = this.humans.v.v.add(this.human_rate.mul(dt));
       this.research_points.v = this.research_points.v.add(
         this.research_rate.mul(dt)
       );
-      this.humans.max.v = this.human_max;
+      this.humans.m.v = this.human_max;
+      this.land.m.v = this.land_max;
     });
   }
   get human_max() {
-    let total = Decimal.dTen.pow(2);
+    let total = Decimal.dTen.mul(this.land.left);
+    total = total.plus(Decimal.dTen.mul(2).mul(this.crude_homes.v));
+    total = total.plus(Decimal.dTen.mul(this.farms.v));
     total = this.calculate_research_effects(total, "max_humans");
+    return total;
+  }
+  get land_max() {
+    let total = Decimal.dTen;
+    total = this.calculate_research_effects(total, "land");
     return total;
   }
   calculate_research_effects(total, n) {
@@ -10053,25 +10121,26 @@ class Game {
     return total;
   }
   get human_rate() {
-    let total = Decimal.dOne.plus(this.humans.humans.v.div(100));
+    let total = Decimal.dOne.plus(this.humans.v.v.div(100));
+    total = total.mul(Decimal.dOne.plus(this.farms.v.div(3)));
     total = this.calculate_research_effects(total, "humans");
     return total;
   }
   get research_rate() {
-    let total = this.humans.humans.v.div(100);
+    let total = this.humans.v.v.div(100);
     total = this.calculate_research_effects(total, "research");
     return total;
   }
   can_afford(research) {
     for (const [k, v] of Object.entries(research.cost)) {
-      if (this.mapped[k]().v.lessThan(v))
+      if (this.effect_mapped[k]().v.lessThan(v))
         return false;
     }
     return true;
   }
   no_check_buy(research) {
     for (const [k, v] of Object.entries(research.cost)) {
-      const current = this.mapped[k]();
+      const current = this.effect_mapped[k]();
       current.v = current.v.minus(v);
     }
   }
@@ -10085,26 +10154,49 @@ class Game {
       return;
     this.no_check_buy(research);
     this.researched[i] = true;
+    if (research.unlock)
+      this.unlocks[research.unlock] = true;
   }
 }
 const game = new Game();
-const _hoisted_1 = ["onClick"];
-const _hoisted_2 = { style: { "font-size": "1.2em" } };
-const _hoisted_3 = { key: 0 };
-const _hoisted_4 = /* @__PURE__ */ createBaseVNode("p", null, "Bought", -1);
-const _hoisted_5 = [
-  _hoisted_4
+const _hoisted_1 = { key: 0 };
+const _hoisted_2 = { key: 1 };
+const _hoisted_3 = ["onClick"];
+const _hoisted_4 = { style: { "font-size": "1.2em" } };
+const _hoisted_5 = { key: 0 };
+const _hoisted_6 = /* @__PURE__ */ createBaseVNode("p", null, "Bought", -1);
+const _hoisted_7 = [
+  _hoisted_6
 ];
-const _hoisted_6 = { key: 1 };
-const _hoisted_7 = /* @__PURE__ */ createBaseVNode("p", null, "Cost:", -1);
+const _hoisted_8 = { key: 1 };
+const _hoisted_9 = /* @__PURE__ */ createBaseVNode("p", null, "Cost:", -1);
 const _sfc_main = /* @__PURE__ */ defineComponent({
   __name: "App",
   setup(__props) {
     const ResearchStuff = ref(Researchs);
     return (_ctx, _cache) => {
       return openBlock(), createElementBlock(Fragment, null, [
-        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).humans.humans.r.value.toFixed(2)) + " / " + toDisplayString(unref(game).humans.max.r.value.floor()), 1),
+        createBaseVNode("h1", null, "Humans: " + toDisplayString(unref(game).humans.v.r.value.toFixed(2)) + " / " + toDisplayString(unref(game).humans.m.r.value.toFixed(2)), 1),
         createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).human_rate.toFixed(2)) + "/s", 1),
+        unref(game).unlocks.CrudeHouse ? (openBlock(), createElementBlock("div", _hoisted_1, [
+          createBaseVNode("h1", null, "Land: " + toDisplayString(unref(game).land.left.toFixed(2)) + " / " + toDisplayString(unref(game).land.m.r.value.toFixed(2)), 1),
+          createBaseVNode("h1", null, "Crude Huts: " + toDisplayString(unref(game).crude_homes.v.toFixed(2)), 1),
+          createBaseVNode("button", {
+            onClick: _cache[0] || (_cache[0] = ($event) => unref(game).build(1, "crude_homes"))
+          }, "Build"),
+          createBaseVNode("button", {
+            onClick: _cache[1] || (_cache[1] = ($event) => unref(game).build(-1, "crude_homes"))
+          }, "Destroy")
+        ])) : createCommentVNode("", true),
+        unref(game).unlocks.BasicAgriculture ? (openBlock(), createElementBlock("div", _hoisted_2, [
+          createBaseVNode("h1", null, "Farm: " + toDisplayString(unref(game).farms.v.toFixed(2)), 1),
+          createBaseVNode("button", {
+            onClick: _cache[2] || (_cache[2] = ($event) => unref(game).build(1, "farms"))
+          }, "Build"),
+          createBaseVNode("button", {
+            onClick: _cache[3] || (_cache[3] = ($event) => unref(game).build(-1, "farms"))
+          }, "Destroy")
+        ])) : createCommentVNode("", true),
         createBaseVNode("h1", null, "Research: " + toDisplayString(unref(game).research_points.r.value.toFixed(2)), 1),
         createBaseVNode("p", null, "Rate: " + toDisplayString(unref(game).research_rate.toFixed(2)) + "/s", 1),
         (openBlock(true), createElementBlock(Fragment, null, renderList(ResearchStuff.value, (upgrade, k) => {
@@ -10112,13 +10204,13 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
             createBaseVNode("button", {
               onClick: ($event) => unref(game).research(k)
             }, [
-              createBaseVNode("p", _hoisted_2, toDisplayString(upgrade.name), 1),
+              createBaseVNode("p", _hoisted_4, toDisplayString(upgrade.name), 1),
               createBaseVNode("p", null, toDisplayString(upgrade.description), 1),
-              unref(game).researched[k] ? (openBlock(), createElementBlock("div", _hoisted_3, _hoisted_5)) : (openBlock(), createElementBlock("div", _hoisted_6, [
-                _hoisted_7,
+              unref(game).researched[k] ? (openBlock(), createElementBlock("div", _hoisted_5, _hoisted_7)) : (openBlock(), createElementBlock("div", _hoisted_8, [
+                _hoisted_9,
                 createBaseVNode("p", null, toDisplayString(upgrade.cost_display), 1)
               ]))
-            ], 8, _hoisted_1)
+            ], 8, _hoisted_3)
           ]);
         }), 256))
       ], 64);
@@ -10126,4 +10218,4 @@ const _sfc_main = /* @__PURE__ */ defineComponent({
   }
 });
 createApp(_sfc_main).mount("#app");
-//# sourceMappingURL=index-6lev0DRz.js.map
+//# sourceMappingURL=index-QOxD93BV.js.map
