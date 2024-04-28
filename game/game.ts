@@ -1,4 +1,4 @@
-import Decimal from "break_eternity.js";
+import Decimal, { type DecimalSource } from "break_eternity.js";
 import { Maxer } from "./maxer";
 import { Observeable, Totaler } from "./utils";
 import {
@@ -6,13 +6,16 @@ import {
   Researchs,
   type ResearchCosts,
   type ResearchEffects,
+  type Unlocks,
 } from "./research";
 
 export class Game {
   public humans = new Maxer();
   public land = new Maxer();
+  public crude_homes = Totaler.Zero;
   public research_points = Totaler.Zero;
   public researched: boolean[] = [];
+  public unlocks: { [P in Unlocks]?: boolean } = {};
   private mapped: { [P in ResearchCosts]: () => Observeable<Decimal> } = {
     humans: () => this.humans.v,
     research: () => this.research_points,
@@ -24,9 +27,26 @@ export class Game {
     this.start_ticks();
   }
 
+  private remove_crude_home(v: DecimalSource) {
+    v = new Decimal(v).abs();
+    const max_remove = this.land.v.v.min(v);
+    this.land.v = this.land.v.v.minus(max_remove);
+    this.crude_homes.v = this.crude_homes.v.minus(max_remove);
+  }
+
+  public build_crude_home(v: DecimalSource) {
+    if (new Decimal(v).lessThan(0)) {
+      this.remove_crude_home(v);
+      return;
+    }
+    const max_build = this.land.left.min(v);
+    this.land.v = this.land.v.v.add(max_build);
+    this.crude_homes.v = this.crude_homes.v.plus(max_build);
+  }
+
   private start_ticks() {
     setInterval(() => {
-      const dt = (Date.now() - this.last_update) / 1000;
+      const dt = ((Date.now() - this.last_update) / 1000) * 100;
       this.last_update = Date.now();
 
       this.humans.v = this.humans.v.v.add(this.human_rate.mul(dt));
@@ -40,6 +60,7 @@ export class Game {
 
   public get human_max() {
     let total = Decimal.dTen.mul(this.land.left);
+    total = total.plus(Decimal.dTen.mul(2).mul(this.crude_homes.v));
     total = this.calculate_research_effects(total, "max_humans");
     return total;
   }
@@ -93,6 +114,7 @@ export class Game {
     if (!this.can_afford(research)) return;
     this.no_check_buy(research);
     this.researched[i] = true;
+    if (research.unlock) this.unlocks[research.unlock] = true;
   }
 }
 

@@ -4,10 +4,7 @@ import type { Game } from "./game";
 
 export type ResearchEffects = "humans" | "research" | "max_humans" | "land";
 export type ResearchCosts = "humans" | "research";
-export enum Unlocks {
-  CrudeHouse,
-  BasicAgriculture,
-}
+export type Unlocks = "CrudeHouse" | "BasicAgriculture";
 
 export type Effect = { [P in ResearchEffects]?: Decimal };
 export type Cost = { [P in ResearchCosts]?: DecimalSource };
@@ -79,7 +76,7 @@ export const Researchs = [
         humans: v.mul(1.5),
       };
     },
-    unlock: Unlocks.CrudeHouse,
+    unlock: "CrudeHouse",
   }),
   new Research({
     cost: { research: 1e4 },
@@ -92,6 +89,6 @@ export const Researchs = [
         research: v.mul(1.3),
       };
     },
-    unlock: Unlocks.BasicAgriculture,
+    unlock: "BasicAgriculture",
   }),
 ];
