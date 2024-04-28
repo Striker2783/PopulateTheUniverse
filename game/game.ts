@@ -39,7 +39,7 @@ export class Game {
     const building = this.build_mapped[n]();
     if (new Decimal(v).lessThan(0)) {
       v = new Decimal(v).abs();
-      const max_remove = this.land.v.v.min(v);
+      const max_remove = this.land.v.v.min(v).min(building.v);
       this.land.v = this.land.v.v.minus(max_remove);
       building.v = building.v.minus(max_remove);
     } else {
